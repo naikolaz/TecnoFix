@@ -1,5 +1,3 @@
-using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TecnoFixBack.src.DTOs;
 using TecnoFixBack.src.interfaces;
@@ -11,36 +9,10 @@ namespace TecnoFixBack.src.controller;
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
-    private readonly ILoginService _loginService;
 
-    public AuthController(IAuthService authService, ILoginService loginService)
+    public AuthController(IAuthService authService)
     {
         _authService = authService;
-        _loginService = loginService;
-    }
-
-    [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginDto dto)
-    {
-        var respuesta = await _loginService.IniciarSesionAsync(dto);
-
-        if (respuesta is null)
-            return Unauthorized(new { error = "Correo electrónico o contraseña incorrectos" });
-
-        return Ok(respuesta);
-    }
-
-    [Authorize]
-    [HttpGet("sesion")]
-    public IActionResult ObtenerSesion()
-    {
-        return Ok(new
-        {
-            id = User.FindFirstValue(ClaimTypes.NameIdentifier),
-            nombreCompleto = User.FindFirstValue(ClaimTypes.Name),
-            email = User.FindFirstValue(ClaimTypes.Email),
-            rol = User.FindFirstValue(ClaimTypes.Role)
-        });
     }
 
     [HttpPost("registrar-cliente")]
@@ -56,26 +28,6 @@ public class AuthController : ControllerBase
         {
             var resultado = await _authService.RegistrarClienteAsync(dto);
             return Ok(new { message = resultado });
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { error = ex.Message });
-        }
-    }
-    
-    [Authorize(Roles = "Administrador")]
-    [HttpPost("registrar-tecnico")]
-    public async Task<IActionResult> RegistrarTecnico([FromBody] RegistroTecnicoDto dto)
-    {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
-
-        try
-        {
-            var resultado = await _authService.RegistrarTecnicoAsync(dto);
-            return Ok(new { mensaje = resultado });
         }
         catch (Exception ex)
         {

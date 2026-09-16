@@ -1,7 +1,6 @@
-namespace TecnoFixBack.Services
+namespace TecnoFixBack.src.interfaces;
+
+public interface IEmailService
 {
-    public interface IEmailService
-    {
-        Task EnviarCorreoAsync(string destinatario, string asunto, string mensaje);
-    }
+    Task EnviarPasswordAsync(string email, string passwordTemporal);
 }

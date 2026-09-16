@@ -29,14 +29,4 @@ public class UserRepository : IUserRepository
         await _context.Usuarios.AddAsync(user);
         await _context.SaveChangesAsync();
     }
-
-    public async Task<User?> ObtenerPorEmailAsync(string email)
-    {
-        var emailNormalizado = email.Trim().ToLower();
-
-        return await _context.Usuarios
-            .AsNoTracking()
-            .Include(u => u.Rol)
-            .FirstOrDefaultAsync(u => u.Email.ToLower() == emailNormalizado);
-    }
 }
