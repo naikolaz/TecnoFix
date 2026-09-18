@@ -10,7 +10,7 @@ public class TecnoFixContext : DbContext
     public DbSet<User> Usuarios { get; set; }
     public DbSet<Rol> Roles { get; set; }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // Configuramos las tablas y relaciones
         modelBuilder.Entity<User>()
@@ -21,5 +21,12 @@ public class TecnoFixContext : DbContext
         // Aseguramos que Email y RUT sean únicos en la base de datos
         modelBuilder.Entity<User>().HasIndex(u => u.Email).IsUnique();
         modelBuilder.Entity<User>().HasIndex(u => u.Rut).IsUnique();
+
+        // NUEVO: Insertar los roles por defecto automáticamente
+        modelBuilder.Entity<Rol>().HasData(
+            new Rol { Id = 1, Name = "Administrador" },
+            new Rol { Id = 2, Name = "Cliente" },
+            new Rol { Id = 3, Name = "Técnico" }
+        );
     }
 }

@@ -29,7 +29,6 @@ namespace TecnoFixBack.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-                    NpgsqlPropertyBuilderExtensions.HasIdentityOptions(b.Property<int>("Id"), 4L, null, null, null, null, null);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -64,7 +63,6 @@ namespace TecnoFixBack.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-                    NpgsqlPropertyBuilderExtensions.HasIdentityOptions(b.Property<int>("Id"), 2L, null, null, null, null, null);
 
                     b.Property<DateTime>("CreateOnly")
                         .HasColumnType("timestamp with time zone");
@@ -74,6 +72,7 @@ namespace TecnoFixBack.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Especialidad")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<int>("IdRol")
@@ -88,9 +87,11 @@ namespace TecnoFixBack.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Rut")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<string>("Telefono")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -104,17 +105,6 @@ namespace TecnoFixBack.Migrations
                         .IsUnique();
 
                     b.ToTable("Usuarios");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreateOnly = new DateTime(2026, 9, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "admin@tecnofix.cl",
-                            IdRol = 1,
-                            NombreCompleto = "Administrador TecnoFix",
-                            Password = "$2a$11$p1aaLoFneaW8kzCJCPJDJe5qJlJm19DomNZtN4U7J2jm8YvlMW3p."
-                        });
                 });
 
             modelBuilder.Entity("TecnoFixBack.src.model.User", b =>

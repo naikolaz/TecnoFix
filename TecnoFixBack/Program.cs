@@ -1,7 +1,5 @@
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+// 1. FALTABAN LAS IMPORTACIONES (using)
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using TecnoFixBack.src.Data;
 using TecnoFixBack.src.interfaces;
 using TecnoFixBack.src.Repositories;
@@ -9,11 +7,15 @@ using TecnoFixBack.src.services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// 2. AGREGAR SOPORTE PARA CONTROLADORES (Vital para tu AuthController)
+builder.Services.AddControllers();
+
+// 3. CAMBIAR SQL SERVER POR POSTGRESQL (Para tu base de datos en Neon)
 builder.Services.AddDbContext<TecnoFixContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(builder.Configuration.GetConnectionString("NeonDB")));
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IEmailService, EmailService>();
+builder.Services.AddScoped<IEmailService, EmailService>(); // Nota: Asegúrate de que tus clases se llamen Service o Services, pero que coincidan
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<ILoginService, LoginService>();
@@ -56,25 +58,14 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var contexto = scope.ServiceProvider.GetRequiredService<TecnoFixContext>();
-    contexto.Database.Migrate();
-}
-
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
-else
-{
-    app.UseHttpsRedirection();
-}
 
-app.UseCors("Frontend");
-app.UseAuthentication();
-app.UseAuthorization();
+app.UseHttpsRedirection();
 
+// 4. MAPEAR LOS CONTROLADORES (Reemplazamos el WeatherForecast por esto)
 app.MapControllers();
 
 app.Run();
