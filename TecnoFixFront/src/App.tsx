@@ -4,14 +4,17 @@ import RutaProtegida from './components/RutaProtegida'
 import EnConstruccionPage from './pages/EnConstruccionPage'
 import InicioPage from './pages/InicioPage'
 import LoginPage from './pages/LoginPage'
+import RegistroCliente from './components/RegistroCliente';
 
 function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      
+      {/* ¡Aquí integramos tu componente! */}
       <Route
         path="/registro"
-        element={<EnConstruccionPage titulo="Registrar cliente" requerimiento="USU-002" publica />}
+        element={<RegistroCliente />}
       />
 
       <Route element={<RutaProtegida />}>
