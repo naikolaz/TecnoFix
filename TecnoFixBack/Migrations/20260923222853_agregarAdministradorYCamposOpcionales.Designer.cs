@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using TecnoFixBack.src.Data;
@@ -11,9 +12,11 @@ using TecnoFixBack.src.Data;
 namespace TecnoFixBack.Migrations
 {
     [DbContext(typeof(TecnoFixContext))]
-    partial class TecnoFixContextModelSnapshot : ModelSnapshot
+    [Migration("20260923222853_agregarAdministradorYCamposOpcionales")]
+    partial class agregarAdministradorYCamposOpcionales
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
