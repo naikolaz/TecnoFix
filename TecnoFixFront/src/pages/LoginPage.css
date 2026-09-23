@@ -1,0 +1,83 @@
+.login {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.login__marca {
+  background: linear-gradient(160deg, var(--color-primario) 0%, var(--color-secundario) 100%);
+  color: var(--color-fondo);
+  padding: 56px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+}
+
+.login__marca h1 {
+  font-size: 2rem;
+  line-height: 1.2;
+  max-width: 460px;
+  margin: 12px 0 0;
+}
+
+.login__marca p {
+  max-width: 420px;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.login__panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+}
+
+.login__tarjeta {
+  width: 100%;
+  max-width: 400px;
+  background: var(--color-superficie);
+  border-radius: 14px;
+  padding: 36px 32px;
+  box-shadow: 0 10px 30px rgba(6, 71, 137, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.login__tarjeta h2 {
+  margin: 0;
+  color: var(--color-primario);
+}
+
+.login__subtitulo {
+  margin: -10px 0 4px;
+  color: var(--color-texto-suave);
+}
+
+.login__registro {
+  margin: 0;
+  text-align: center;
+  color: var(--color-texto-suave);
+}
+
+.login__registro a {
+  color: var(--color-primario);
+  font-weight: 600;
+}
+
+@media (max-width: 800px) {
+  .login {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .login__marca {
+    padding: 32px 16px;
+    gap: 12px;
+  }
+
+  .login__marca h1 {
+    font-size: 1.4rem;
+  }
+}
