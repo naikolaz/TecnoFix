@@ -6,9 +6,9 @@ public class User
     public string NombreCompleto { get; set; } = string.Empty; // Para Nombre y apellidos
     public string Email { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
-    public string Rut { get; set; } = string.Empty;
-    public string Telefono { get; set; } = string.Empty;
-    public string Especialidad { get; set; } = string.Empty; // Será null o vacío para clientes, se usa para técnicos
+    public string? Rut { get; set; } // Solo clientes; null para administrador y técnicos
+    public string? Telefono { get; set; } // Solo clientes
+    public string? Especialidad { get; set; } // Solo técnicos
     
     public DateTime CreateOnly { get; set; } = DateTime.UtcNow;
 
