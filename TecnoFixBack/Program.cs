@@ -9,9 +9,12 @@ using TecnoFixBack.src.services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<TecnoFixContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddControllers();
 
+builder.Services.AddDbContext<TecnoFixContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("NeonDB")));
+
+// Inyección de dependencias
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -51,7 +54,6 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod());
 });
 
-builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
