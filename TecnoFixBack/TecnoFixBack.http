@@ -1,6 +1,32 @@
 @TecnoFixBack_HostAddress = http://localhost:5199
 
-GET {{TecnoFixBack_HostAddress}}/weatherforecast/
-Accept: application/json
+### USU-001 Iniciar sesión (credenciales correctas)
+POST {{TecnoFixBack_HostAddress}}/api/auth/login
+Content-Type: application/json
 
-###
+{
+  "email": "admin@tecnofix.cl",
+  "password": "Admin2026"
+}
+
+### USU-001 Correo con formato inválido
+POST {{TecnoFixBack_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin.tecnofix.cl",
+  "password": "Admin2026"
+}
+
+### USU-001 Credenciales incorrectas
+POST {{TecnoFixBack_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@tecnofix.cl",
+  "password": "otraClave1"
+}
+
+### Sesión actual (pegar el token obtenido en el login)
+GET {{TecnoFixBack_HostAddress}}/api/auth/sesion
+Authorization: Bearer PEGAR_TOKEN_AQUI
