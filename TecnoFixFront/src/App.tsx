@@ -5,17 +5,18 @@ import EnConstruccionPage from './pages/EnConstruccionPage'
 import InicioPage from './pages/InicioPage'
 import LoginPage from './pages/LoginPage'
 import RegistroCliente from './components/RegistroCliente';
+import RegistrarTecnicoPage from './pages/RegistrarTecnicoPage';
 
 function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       
-      {/* ¡Aquí integramos tu componente! */}
       <Route
         path="/registro"
         element={<RegistroCliente />}
       />
+      
 
       <Route element={<RutaProtegida />}>
         <Route element={<Layout />}>
@@ -27,11 +28,13 @@ function App() {
         </Route>
       </Route>
 
+      {/* Ruta protegida que verifica que el rol sea Administrador */}
       <Route element={<RutaProtegida rolesPermitidos={['Administrador']} />}>
         <Route element={<Layout />}>
+          {/* 2. Reemplazamos la página en construcción por tu formulario real */}
           <Route
             path="/tecnicos/registrar"
-            element={<EnConstruccionPage titulo="Registrar técnico" requerimiento="USU-003" />}
+            element={<RegistrarTecnicoPage />}
           />
         </Route>
       </Route>

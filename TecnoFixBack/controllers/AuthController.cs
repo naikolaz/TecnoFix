@@ -62,4 +62,23 @@ public class AuthController : ControllerBase
             return BadRequest(new { error = ex.Message });
         }
     }
+    
+    [HttpPost("registrar-tecnico")]
+    public async Task<IActionResult> RegistrarTecnico([FromBody] RegistroTecnicoDto dto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        try
+        {
+            var resultado = await _authService.RegistrarTecnicoAsync(dto);
+            return Ok(new { mensaje = resultado });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
 }

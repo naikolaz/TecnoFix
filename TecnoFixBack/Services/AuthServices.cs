@@ -57,6 +57,31 @@ public class AuthService : IAuthService
         return "Cliente registrado exitosamente. Se ha enviado la contraseña al correo.";
     }
 
+    public async Task<string> RegistrarTecnicoAsync(RegistroTecnicoDto dto)
+    {
+        if (await _userRepository.ExisteEmailAsync(dto.Email)) 
+            throw new Exception("El correo electrónico ingresado ya se encuentra registrado.");
+
+        string passwordTemporal = GenerarPasswordAleatorio(8);
+        string passwordHasheada = BCrypt.Net.BCrypt.HashPassword(passwordTemporal);
+
+        var nuevoTecnico = new User
+        {
+            NombreCompleto = dto.NombreCompleto,
+            Email = dto.Email,
+            Especialidad = dto.Especialidad,
+            Password = passwordHasheada, 
+            IdRol = 3,
+            // ID autogenerado para evitar el choque con la validación UNIQUE del RUT en la base de datos
+            Rut = $"TEC-{Guid.NewGuid().ToString()[..8]}", 
+            Telefono = "Sin Registro"
+        };
+
+        await _userRepository.CrearUsuarioAsync(nuevoTecnico);
+        await _emailService.EnviarPasswordAsync(nuevoTecnico.Email, passwordTemporal);
+
+        return "Técnico registrado exitosamente. Se ha enviado la contraseña al correo.";
+    }
     // (Aquí mantienes los métodos privados ValidarRut y GenerarPasswordAleatorio que te di en el mensaje anterior)
     private bool ValidarRut(string rut) { /* Código anterior... */ return true; }
     private string GenerarPasswordAleatorio(int longitud) { /* Código anterior... */ return "12345678"; }

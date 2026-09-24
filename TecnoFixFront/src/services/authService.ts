@@ -8,3 +8,7 @@ export const iniciarSesion = async (datos: LoginRequest): Promise<LoginResponse>
   })
   return data
 }
+export const registrarTecnico = async (datosTecnico: { nombreCompleto: string; email: string; especialidad: string }) => {
+    const { data } = await api.post('/auth/registrar-tecnico', datosTecnico);
+    return data;
+};
