@@ -22,8 +22,6 @@ function App() {
         <Route element={<Layout />}>
           <Route path="/inicio" element={<InicioPage />} />
           <Route
-            path="/cambiar-contrasena"
-            element={<EnConstruccionPage titulo="Cambiar contraseña" requerimiento="USU-004" />}
           />
         </Route>
       </Route>

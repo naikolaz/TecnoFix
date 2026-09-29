@@ -7,12 +7,7 @@ export interface OpcionMenu {
   disponible: boolean
 }
 
-const cambiarContrasena: OpcionMenu = {
-  titulo: 'Cambiar contraseña',
-  descripcion: 'Actualiza tu contraseña de acceso.',
-  ruta: '/cambiar-contrasena',
-  disponible: true,
-}
+
 
 export const MENU_POR_ROL: Record<Rol, OpcionMenu[]> = {
   Administrador: [
@@ -34,7 +29,7 @@ export const MENU_POR_ROL: Record<Rol, OpcionMenu[]> = {
       ruta: '/estadisticas',
       disponible: false,
     },
-    cambiarContrasena,
+
   ],
   Técnico: [
     {
@@ -43,7 +38,7 @@ export const MENU_POR_ROL: Record<Rol, OpcionMenu[]> = {
       ruta: '/ordenes',
       disponible: false,
     },
-    cambiarContrasena,
+
   ],
   Cliente: [
     {
@@ -52,6 +47,6 @@ export const MENU_POR_ROL: Record<Rol, OpcionMenu[]> = {
       ruta: '/mis-ordenes',
       disponible: false,
     },
-    cambiarContrasena,
+
   ],
 }
