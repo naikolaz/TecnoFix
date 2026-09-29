@@ -2,6 +2,8 @@ using TecnoFixBack.src.interfaces;
 using TecnoFixBack.src.DTOs;
 using TecnoFixBack.src.model;
 using BCrypt.Net;
+using System.Text.RegularExpressions;
+using TecnoFixBack.Services; // Necesario para validar el formato del correo
 
 namespace TecnoFixBack.src.services;
 
@@ -10,7 +12,6 @@ public class AuthService : IAuthService
     private readonly IUserRepository _userRepository;
     private readonly IEmailService _emailService;
 
-    // Inyectamos las dependencias
     public AuthService(IUserRepository userRepository, IEmailService emailService)
     {
         _userRepository = userRepository;
@@ -19,25 +20,38 @@ public class AuthService : IAuthService
 
     public async Task<string> RegistrarClienteAsync(RegistroClienteDto dto)
     {
-        // 1. Validar RUT (Algoritmo Módulo 11)
+        // 1. Validar campos nulos o vacíos (Seguridad básica)
+        if (string.IsNullOrWhiteSpace(dto.NombreCompleto) || 
+            string.IsNullOrWhiteSpace(dto.Email) || 
+            string.IsNullOrWhiteSpace(dto.Rut) || 
+            string.IsNullOrWhiteSpace(dto.Telefono))
+        {
+            throw new Exception("Todos los campos son obligatorios.");
+        }
+
+        // 2. Validar el formato exacto del correo ("que el correo exista" estructuralmente)
+        if (!ValidarFormatoEmail(dto.Email))
+        {
+            throw new Exception("El formato del correo electrónico no es válido (ej: usuario@dominio.com).");
+        }
+
+        // 3. Validar RUT (Algoritmo Módulo 11)
         if (!ValidarRut(dto.Rut))
             throw new Exception("El RUT ingresado no es válido según el algoritmo de Chile.");
 
-        // 2. Validar que el correo sea único
+        // 4. Validar que el correo sea único en la BD
         if (await _userRepository.ExisteEmailAsync(dto.Email)) 
             throw new Exception("El correo electrónico ingresado ya se encuentra registrado.");
         
-        // 3. Validar que el RUT sea único
+        // 5. Validar que el RUT sea único en la BD
         if (await _userRepository.ExisteRutAsync(dto.Rut)) 
             throw new Exception("El RUT ingresado ya se encuentra registrado.");
 
-        // 4. Generar contraseña aleatoria de 8 caracteres
+        // 6. Lógica de negocio: Generar y encriptar
         string passwordTemporal = GenerarPasswordAleatorio(8);
-
-        // 5. Encriptar contraseña por seguridad
         string passwordHasheada = BCrypt.Net.BCrypt.HashPassword(passwordTemporal);
 
-        // 6. Crear entidad User
+        // 7. Crear entidad User
         var nuevoCliente = new User
         {
             NombreCompleto = dto.NombreCompleto,
@@ -45,17 +59,32 @@ public class AuthService : IAuthService
             Rut = dto.Rut,
             Telefono = dto.Telefono,
             Password = passwordHasheada, 
-            IdRol = 2 // Asumiendo que 2 es el ID del rol "Cliente" en tu tabla Roles
+            IdRol = 2 // Rol "Cliente"
         };
 
-        // 7. Guardar en base de datos
+        // 8. Guardar en base de datos
         await _userRepository.CrearUsuarioAsync(nuevoCliente);
 
-        // 8. Enviar correo 
-        await _emailService.EnviarPasswordAsync(nuevoCliente.Email, passwordTemporal);
+       // 9. Intentar enviar el correo
+        try
+        {
+            string asunto = "Bienvenido a TecnoFix - Tus credenciales";
+            string mensajeHtml = $"<h1>Bienvenido a TecnoFix</h1><p>Hola {nuevoCliente.NombreCompleto}, tu cuenta ha sido creada. Tu contraseña temporal es: <strong>{passwordTemporal}</strong></p>";
 
+            // Usamos el método correcto: EnviarCorreoAsync
+            await _emailService.EnviarCorreoAsync(nuevoCliente.Email, asunto, mensajeHtml);
+        }
+   catch (Exception ex)
+        {
+            // Solo avisamos en consola, pero NO lo borramos.
+            Console.WriteLine($"Error de SendGrid: {ex.Message}");
+            throw new Exception("Cliente registrado en la base de datos, pero hubo un problema al enviar el correo. Intente solicitar una nueva contraseña.");
+        }
+
+        // AGREGA ESTA LÍNEA PARA QUE EL CÓDIGO COMPILE CORRECTAMENTE
         return "Cliente registrado exitosamente. Se ha enviado la contraseña al correo.";
     }
+    // --- MÉTODOS PRIVADOS DE VALIDACIÓN ---
 
     public async Task<string> RegistrarTecnicoAsync(RegistroTecnicoDto dto)
     {
@@ -82,7 +111,21 @@ public class AuthService : IAuthService
 
         return "Técnico registrado exitosamente. Se ha enviado la contraseña al correo.";
     }
-    // (Aquí mantienes los métodos privados ValidarRut y GenerarPasswordAleatorio que te di en el mensaje anterior)
+
+    // Nuevo método: Verifica que tenga el formato texto@texto.texto
+    private bool ValidarFormatoEmail(string email)
+    {
+        try
+        {
+            return Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$", RegexOptions.IgnoreCase);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    // (Aquí mantienes los métodos privados originales)
     private bool ValidarRut(string rut) { /* Código anterior... */ return true; }
     private string GenerarPasswordAleatorio(int longitud) { /* Código anterior... */ return "12345678"; }
 }

@@ -2,10 +2,13 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using TecnoFixBack.Services;
 using TecnoFixBack.src.Data;
 using TecnoFixBack.src.interfaces;
 using TecnoFixBack.src.Repositories;
 using TecnoFixBack.src.services;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,12 +17,13 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<TecnoFixContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("NeonDB")));
 
-// Inyección de dependencias
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IEmailService, EmailService>();
+
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<ILoginService, LoginService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IEmailService, SendGridEmailService>(); // <- Mantén esta
+
 
 var jwtKey = builder.Configuration["Jwt:Key"]
     ?? throw new InvalidOperationException("Falta configurar Jwt:Key en appsettings.");
