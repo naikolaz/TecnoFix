@@ -9,6 +9,15 @@ export const iniciarSesion = async (datos: LoginRequest): Promise<LoginResponse>
   return data
 }
 export const registrarTecnico = async (datosTecnico: { nombreCompleto: string; email: string; especialidad: string }) => {
-    const { data } = await api.post('/auth/registrar-tecnico', datosTecnico);
-    return data;
+    try {
+        const { data } = await api.post('/auth/registrar-tecnico', datosTecnico);
+        return data;
+    } catch (error: any) {
+        // Buscamos si el backend envió nuestro mensaje personalizado dentro de error.response.data.error
+        if (error.response && error.response.data && error.response.data.error) {
+            throw new Error(error.response.data.error);
+        }
+        // Si el error es otro (ej. se apagó el servidor backend), lanzamos uno genérico
+        throw new Error("Ocurrió un error inesperado al comunicarse con el servidor.");
+    }
 };
