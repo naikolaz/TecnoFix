@@ -1,4 +1,6 @@
 import { useState } from 'react';
+import api from '../config/api';
+import { obtenerMensajeError } from '../utils/errores';
 
 interface FormularioRegistro {
   nombreCompleto: string;
@@ -28,11 +30,27 @@ export default function RegistroCliente() {
 
   const validate = (): boolean => {
     const errors: Partial<FormularioRegistro> = {};
-    if (!formData.nombreCompleto.trim()) errors.nombreCompleto = 'El nombre es obligatorio.';
-    if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
-      errors.email = 'Correo electrónico no válido.';
-    if (!formData.rut.trim()) errors.rut = 'El RUT es obligatorio.';
-    if (!formData.telefono.trim()) errors.telefono = 'El teléfono es obligatorio.';
+    
+    if (!formData.nombreCompleto.trim()) {
+      errors.nombreCompleto = 'Debe completar el campo Nombre y apellidos';
+    }
+    
+    if (!formData.email.trim()) {
+      errors.email = 'Debe completar el campo Correo electrónico';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = 'El correo electrónico no tiene un formato válido';
+    }
+    
+    if (!formData.rut.trim()) {
+      errors.rut = 'Debe completar el campo RUT';
+    } else if (formData.rut.includes('.') || formData.rut.includes('-')) {
+      errors.rut = 'El RUT debe ingresarse sin puntos ni guion (ej.: 12345670K)';
+    }
+    
+    if (!formData.telefono.trim()) {
+      errors.telefono = 'Debe completar el campo Teléfono de contacto';
+    }
+
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -45,21 +63,11 @@ export default function RegistroCliente() {
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:5199/api/auth/registrar-cliente', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-
-      if (response.ok) {
-        setMensajeExito(true);
-        setFormData({ nombreCompleto: '', email: '', rut: '', telefono: '' });
-      } else {
-        const errorData = await response.json();
-        setError(errorData.error || errorData.title || 'Ocurrió un error al registrar.');
-      }
-    } catch {
-      setError('Error de conexión con el servidor. ¿Está encendido el backend?');
+      await api.post('/auth/registrar-cliente', formData);
+      setMensajeExito(true);
+      setFormData({ nombreCompleto: '', email: '', rut: '', telefono: '' });
+    } catch (e: any) {
+      setError(obtenerMensajeError(e));
     } finally {
       setLoading(false);
     }
@@ -149,11 +157,11 @@ export default function RegistroCliente() {
             id="rut"
             name="rut"
             type="text"
-            placeholder="123456789"
+            placeholder="12345670K"
             value={formData.rut}
             onChange={handleChange}
             error={fieldErrors.rut}
-            tooltip="Sin puntos ni guion (Ej: 123456789)"
+            tooltip="Sin puntos ni guion (ej.: 12345670K)"
           />
 
           {/* Campo teléfono */}

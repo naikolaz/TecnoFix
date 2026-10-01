@@ -48,15 +48,14 @@ builder.Services
 builder.Services.AddAuthorization();
 
 var origenesPermitidos = builder.Configuration.GetSection("Cors:OrigenesPermitidos").Get<string[]>()
-    ?? ["http://localhost:5173"];
+    ?? ["http://localhost:5173", "https://techno-fix-ochre.vercel.app"]; // Ajusta tu URL de Vercel aquí
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
-        policy.SetIsOriginAllowed(_ => true) // Permite cualquier origen de forma segura
+        policy.WithOrigins(origenesPermitidos)
               .AllowAnyHeader()
-              .AllowAnyMethod()
-              .AllowCredentials());         // Permite credenciales y tokens sin bloquear el CORS
+              .AllowAnyMethod());
 });
 
 builder.Services.AddOpenApi();
