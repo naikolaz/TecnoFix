@@ -109,8 +109,6 @@ public class AuthService : IAuthService
             Especialidad = dto.Especialidad,
             Password = passwordHasheada, 
             IdRol = 3, // Rol Técnico
-            Rut = $"TEC-{Guid.NewGuid().ToString()[..8]}", 
-            Telefono = "Sin Registro"
         };
 
         await _userRepository.CrearUsuarioAsync(nuevoTecnico);
