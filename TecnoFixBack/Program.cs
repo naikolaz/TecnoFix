@@ -53,9 +53,10 @@ var origenesPermitidos = builder.Configuration.GetSection("Cors:OrigenesPermitid
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
-        policy.AllowAnyOrigin() // <- Permite peticiones desde Vercel, localhost o cualquier lado
+        policy.SetIsOriginAllowed(_ => true) // Permite cualquier origen de forma segura
               .AllowAnyHeader()
-              .AllowAnyMethod());
+              .AllowAnyMethod()
+              .AllowCredentials());         // Permite credenciales y tokens sin bloquear el CORS
 });
 
 builder.Services.AddOpenApi();
