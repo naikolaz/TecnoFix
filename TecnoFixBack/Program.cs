@@ -53,7 +53,7 @@ var origenesPermitidos = builder.Configuration.GetSection("Cors:OrigenesPermitid
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
-        policy.WithOrigins(origenesPermitidos)
+        policy.AllowAnyOrigin() // <- Permite peticiones desde Vercel, localhost o cualquier lado
               .AllowAnyHeader()
               .AllowAnyMethod());
 });
