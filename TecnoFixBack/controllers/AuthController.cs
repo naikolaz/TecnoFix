@@ -63,6 +63,7 @@ public class AuthController : ControllerBase
         }
     }
     
+    [Authorize(Roles = "Administrador")]
     [HttpPost("registrar-tecnico")]
     public async Task<IActionResult> RegistrarTecnico([FromBody] RegistroTecnicoDto dto)
     {
