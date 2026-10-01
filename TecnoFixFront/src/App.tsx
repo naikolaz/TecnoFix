@@ -1,7 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
 import Layout from './components/Layout'
 import RutaProtegida from './components/RutaProtegida'
-import EnConstruccionPage from './pages/EnConstruccionPage'
 import InicioPage from './pages/InicioPage'
 import LoginPage from './pages/LoginPage'
 import RegistroCliente from './components/RegistroCliente';
@@ -21,8 +20,6 @@ function App() {
       <Route element={<RutaProtegida />}>
         <Route element={<Layout />}>
           <Route path="/inicio" element={<InicioPage />} />
-          <Route
-          />
         </Route>
       </Route>
 
