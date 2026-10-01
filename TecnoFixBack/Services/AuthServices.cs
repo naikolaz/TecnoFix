@@ -151,7 +151,7 @@ private bool ValidarRut(string rut)
         try
         {
             // 1. Limpiar puntos y guiones
-            rut = rut.Replace(".", "").ToUpper();
+            rut = rut.Replace(".", "-").ToUpper();
             
             // Si viene con guión, lo separamos, si no, asumimos que el último dígito es el verificador
             var partes = rut.Split('-');
