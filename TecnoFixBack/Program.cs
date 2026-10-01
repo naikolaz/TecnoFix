@@ -53,7 +53,7 @@ var origenesPermitidos = builder.Configuration.GetSection("Cors:OrigenesPermitid
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
-        policy.WithOrigins(origenesPermitidos)
+        policy.AllowAnyOrigin()
               .AllowAnyHeader()
               .AllowAnyMethod());
 });
@@ -78,6 +78,7 @@ else
 }
 
 app.UseCors("Frontend");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
