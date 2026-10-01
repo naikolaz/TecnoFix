@@ -143,7 +143,64 @@ public class AuthService : IAuthService
         }
     }
 
-    private bool ValidarRut(string rut) { /* Mantén tu lógica del Módulo 11 aquí */ return true; }
+private bool ValidarRut(string rut)
+    {
+        if (string.IsNullOrWhiteSpace(rut))
+            return false;
+
+        try
+        {
+            // 1. Limpiar puntos y guiones
+            rut = rut.Replace(".", "").ToUpper();
+            
+            // Si viene con guión, lo separamos, si no, asumimos que el último dígito es el verificador
+            var partes = rut.Split('-');
+            if (partes.Length != 2)
+            {
+                // Por si el usuario lo ingresó sin guión pero con DV al final
+                if (rut.Length < 2) return false;
+                partes = new string[] { rut[..^1], rut[^1..] };
+            }
+
+            string cuerpoStr = partes[0];
+            string dvStr = partes[1];
+
+            // 2. Validar que el cuerpo sea numérico
+            if (!int.TryParse(cuerpoStr, out int cuerpo))
+                return false;
+
+            // 3. Calcular dígito verificador con Módulo 11
+            int suma = 0;
+            int multiplicador = 2;
+
+            while (cuerpo > 0)
+            {
+                int resto = cuerpo % 10;
+                suma += resto * multiplicador;
+                cuerpo /= 10;
+                multiplicador++;
+                if (multiplicador == 8)
+                {
+                    multiplicador = 2;
+                }
+            }
+
+            int restoDv = 11 - (suma % 11);
+            string dvCalculado = restoDv switch
+            {
+                11 => "0",
+                10 => "K",
+                _ => restoDv.ToString()
+            };
+
+            // 4. Comparar el dígito calculado con el ingresado
+            return dvCalculado == dvStr;
+        }
+        catch
+        {
+            return false;
+        }
+    }
     
     private string GenerarPasswordAleatorio(int longitud)
     {
