@@ -24,6 +24,14 @@ namespace TecnoFixBack.Services
             var msg = MailHelper.CreateSingleEmail(from, to, asunto, mensaje, mensaje);
             
             await client.SendEmailAsync(msg);
+
+            var respuesta = await client.SendEmailAsync(msg);
+            if (!respuesta.IsSuccessStatusCode)
+        {
+            throw new Exception($"SendGrid respondió {(int)respuesta.StatusCode}");
+            }
+
+        
         }
     }
 }
