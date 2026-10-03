@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../config/api';
 import { obtenerMensajeError } from '../utils/errores';
 
@@ -187,7 +188,7 @@ export default function RegistroCliente() {
 
           <p style={styles.cardFooter}>
             ¿Ya tienes cuenta?{' '}
-            <a href="/login" style={styles.link}>Inicia sesión aquí</a>
+            <Link to="/login" style={styles.link}>Inicia sesión aquí</Link>
           </p>
         </div>
       </div>
