@@ -177,7 +177,7 @@ export default function RegistroCliente() {
             onChange={handleChange}
             error={fieldErrors.telefono}
             tooltip="Formato chileno: 11 dígitos (+569XXXXXXXX)"
-            maxLength={11}
+            maxLength={12}
           />
 
           <button
