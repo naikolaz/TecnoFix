@@ -48,12 +48,11 @@ export default function RegistroCliente() {
       errors.rut = 'El RUT debe ingresarse sin puntos ni guion (ej.: 12345670K)';
     }
     
-    if (!formData.telefono.trim()) {
+   if (!formData.telefono.trim()) {
       errors.telefono = 'Debe completar el campo Teléfono de contacto';
-    } else if (!/^\+569\d{8}$/.test(formData.telefono)) {
-      errors.telefono = 'El teléfono debe tener el formato chileno de 11 dígitos (+569 seguido de 8 dígitos)';
+    } else if (!/^\+?\d{11}$/.test(formData.telefono)) {
+      errors.telefono = 'El teléfono debe tener exactamente 11 dígitos (ej: +56912345678 o 56912345678)';
     }
-
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
   };
