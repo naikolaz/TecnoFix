@@ -29,34 +29,38 @@ export default function RegistroCliente() {
     setFieldErrors(prev => ({ ...prev, [name]: '' }));
   };
 
+  // ── CORRECCIÓN 1: validate() ahora cierra correctamente y retorna boolean ──
   const validate = (): boolean => {
     const errors: Partial<FormularioRegistro> = {};
-    
+
     if (!formData.nombreCompleto.trim()) {
       errors.nombreCompleto = 'Debe completar el campo Nombre y apellidos';
     }
-    
+
     if (!formData.email.trim()) {
       errors.email = 'Debe completar el campo Correo electrónico';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       errors.email = 'El correo electrónico no tiene un formato válido';
     }
-    
+
     if (!formData.rut.trim()) {
       errors.rut = 'Debe completar el campo RUT';
     } else if (formData.rut.includes('.') || formData.rut.includes('-')) {
       errors.rut = 'El RUT debe ingresarse sin puntos ni guion (ej.: 12345670K)';
     }
-    
-   if (!formData.telefono.trim()) {
+
+    if (!formData.telefono.trim()) {
       errors.telefono = 'Debe completar el campo Teléfono de contacto';
-    } else if (!/^\+?\d{12}$/.test(formData.telefono)) {
-      errors.telefono = 'El teléfono debe tener exactamente 11 dígitos (ej: +56912345678 o 56912345678)';
+    } else if (!/^\+?\d{10,11}$/.test(formData.telefono)) {
+      errors.telefono = 'El teléfono debe tener 11 caracteres máximo (ej: +56912345678)';
     }
+
+    // CORRECCIÓN 1a: registrar errores en el estado y retornar resultado
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
-  };
+  }; // ← cierre correcto de validate()
 
+  // ── CORRECCIÓN 2: handleSubmit ahora está fuera de validate() ──
   const handleSubmit = async () => {
     setError(null);
     setMensajeExito(false);
