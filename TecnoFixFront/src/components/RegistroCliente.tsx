@@ -49,6 +49,8 @@ export default function RegistroCliente() {
     
     if (!formData.telefono.trim()) {
       errors.telefono = 'Debe completar el campo Teléfono de contacto';
+    } else if (!/^\+569\d{8}$/.test(formData.telefono)) {
+      errors.telefono = 'El teléfono debe tener el formato chileno de 11 dígitos (+569 seguido de 8 dígitos)';
     }
 
     setFieldErrors(errors);
@@ -174,7 +176,8 @@ export default function RegistroCliente() {
             value={formData.telefono}
             onChange={handleChange}
             error={fieldErrors.telefono}
-            tooltip="Con código de país (Ej: +56912345678)"
+            tooltip="Formato chileno: 11 dígitos (+569XXXXXXXX)"
+            maxLength={11}
           />
 
           <button
@@ -207,9 +210,10 @@ interface FieldProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   error?: string;
   tooltip?: string;
+  maxLength?: number;
 }
 
-function Field({ label, id, name, type, placeholder, value, onChange, error, tooltip }: FieldProps) {
+function Field({ label, id, name, type, placeholder, value, onChange, error, tooltip, maxLength }: FieldProps) {
   return (
     <div style={styles.field}>
       <label htmlFor={id} style={styles.label}>{label}</label>
@@ -222,6 +226,7 @@ function Field({ label, id, name, type, placeholder, value, onChange, error, too
           value={value}
           onChange={onChange}
           required
+          maxLength={maxLength}
           title={tooltip}
           style={{
             ...styles.input,
