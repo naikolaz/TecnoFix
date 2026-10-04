@@ -50,7 +50,7 @@ export default function RegistroCliente() {
     
    if (!formData.telefono.trim()) {
       errors.telefono = 'Debe completar el campo Teléfono de contacto';
-    } else if (!/^\+?\d{11}$/.test(formData.telefono)) {
+    } else if (!/^\+?\d{12}$/.test(formData.telefono)) {
       errors.telefono = 'El teléfono debe tener exactamente 11 dígitos (ej: +56912345678 o 56912345678)';
     }
     setFieldErrors(errors);
