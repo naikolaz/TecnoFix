@@ -168,6 +168,7 @@ export default function RegistroCliente() {
             onChange={handleChange}
             error={fieldErrors.rut}
             tooltip="Sin puntos ni guion (ej.: 12345670K)"
+            maxLength={9}
           />
 
           {/* Campo teléfono */}
@@ -181,7 +182,7 @@ export default function RegistroCliente() {
             onChange={handleChange}
             error={fieldErrors.telefono}
             tooltip="Formato chileno: 11 dígitos (+569XXXXXXXX)"
-            maxLength={12}
+           maxLength={12}
           />
 
           <button
