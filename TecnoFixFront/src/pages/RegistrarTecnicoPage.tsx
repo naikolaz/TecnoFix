@@ -11,8 +11,10 @@ export const RegistrarTecnicoPage = () => {
     const [especialidad, setEspecialidad] = useState('');
     const [errores, setErrores] = useState({ nombre: '', general: '' });
     const [cargando, setCargando] = useState(false);
+    const [mensajeExito, setMensajeExito] = useState('');
 
     const handleSubmit = async (e: React.FormEvent) => {
+        setMensajeExito('');
         e.preventDefault();
         setErrores({ nombre: '', general: '' });
 
@@ -31,7 +33,7 @@ export const RegistrarTecnicoPage = () => {
         setCargando(true);
         try {
             await registrarTecnico({ nombreCompleto, email, especialidad });
-            alert('Técnico registrado exitosamente.');
+            setMensajeExito('Técnico registrado exitosamente.');
             setNombreCompleto(''); setEmail(''); setEspecialidad('');
         } catch (error: any) {
             setErrores(prev => ({ ...prev, general: error.message }));
@@ -65,6 +67,14 @@ export const RegistrarTecnicoPage = () => {
 
                     <MensajeError mensaje={errores.general} />
 
+
+
+                    <MensajeError mensaje={errores.general} />
+                    {mensajeExito && (
+                        <div style={{ backgroundColor: '#d4edda', color: '#155724', padding: '10px', borderRadius: '6px', textAlign: 'center', fontSize: '14px' }}>
+                            {mensajeExito}
+                        </div>
+                    )}
                     <button type="submit" className="boton boton--primario boton--bloque" disabled={cargando}>
                             {cargando ? 'Registrando...' : 'Registrar Técnico'}
                     </button>
