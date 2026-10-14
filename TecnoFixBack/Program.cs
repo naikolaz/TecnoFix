@@ -6,6 +6,9 @@ using TecnoFixBack.src.Data;
 using TecnoFixBack.src.interfaces;
 using TecnoFixBack.src.Repositories;
 using TecnoFixBack.src.services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Text;
+
 
 
 

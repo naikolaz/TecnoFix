@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Naiky\\OneDrive\\Desktop\\TecnoFix\\TecnoFixBack\\TecnoFixBack.csproj": {}
+    "C:\\Users\\Naiky\\OneDrive\\Desktop\\TecnoFix\\tecnofixback\\TecnoFixBack.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Naiky\\OneDrive\\Desktop\\TecnoFix\\TecnoFixBack\\TecnoFixBack.csproj": {
+    "C:\\Users\\Naiky\\OneDrive\\Desktop\\TecnoFix\\tecnofixback\\TecnoFixBack.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Naiky\\OneDrive\\Desktop\\TecnoFix\\TecnoFixBack\\TecnoFixBack.csproj",
+        "projectUniqueName": "C:\\Users\\Naiky\\OneDrive\\Desktop\\TecnoFix\\tecnofixback\\TecnoFixBack.csproj",
         "projectName": "TecnoFixBack",
-        "projectPath": "C:\\Users\\Naiky\\OneDrive\\Desktop\\TecnoFix\\TecnoFixBack\\TecnoFixBack.csproj",
+        "projectPath": "C:\\Users\\Naiky\\OneDrive\\Desktop\\TecnoFix\\tecnofixback\\TecnoFixBack.csproj",
         "packagesPath": "C:\\Users\\Naiky\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Naiky\\OneDrive\\Desktop\\TecnoFix\\TecnoFixBack\\obj\\",
+        "outputPath": "C:\\Users\\Naiky\\OneDrive\\Desktop\\TecnoFix\\tecnofixback\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Naiky\\AppData\\Roaming\\NuGet\\NuGet.Config"

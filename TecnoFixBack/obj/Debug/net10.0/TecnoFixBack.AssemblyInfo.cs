@@ -10,10 +10,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("tecnofix-back-2026-2")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("TecnoFixBack")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+56c77654685de6e41cf9f9651ef47dadf4f2dc9c")]
 [assembly: System.Reflection.AssemblyProductAttribute("TecnoFixBack")]
 [assembly: System.Reflection.AssemblyTitleAttribute("TecnoFixBack")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "7S/1b1aiMXo=",
+  "dgSpecHash": "TZCqGYVUstw=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Naiky\\OneDrive\\Desktop\\TecnoFix\\TecnoFixBack\\TecnoFixBack.csproj",
+  "projectFilePath": "C:\\Users\\Naiky\\OneDrive\\Desktop\\TecnoFix\\tecnofixback\\TecnoFixBack.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Naiky\\.nuget\\packages\\bcrypt.net-next\\4.2.0\\bcrypt.net-next.4.2.0.nupkg.sha512",
     "C:\\Users\\Naiky\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
