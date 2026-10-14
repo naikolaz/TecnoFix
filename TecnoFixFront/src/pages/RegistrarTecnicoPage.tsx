@@ -4,11 +4,13 @@ import CampoFormulario from '../components/CampoFormulario';
 import MensajeError from '../components/MensajeError';
 import './LoginPage.css';
 
+
 export const RegistrarTecnicoPage = () => {
     const [nombreCompleto, setNombreCompleto] = useState('');
     const [email, setEmail] = useState('');
     const [especialidad, setEspecialidad] = useState('');
     const [errores, setErrores] = useState({ nombre: '', general: '' });
+    const [cargando, setCargando] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -26,12 +28,15 @@ export const RegistrarTecnicoPage = () => {
 
         if (!window.confirm('¿Está seguro?')) return;
 
+        setCargando(true);
         try {
             await registrarTecnico({ nombreCompleto, email, especialidad });
             alert('Técnico registrado exitosamente.');
             setNombreCompleto(''); setEmail(''); setEspecialidad('');
         } catch (error: any) {
             setErrores(prev => ({ ...prev, general: error.message }));
+        } finally {
+            setCargando(false);
         }
     };
 
@@ -60,8 +65,8 @@ export const RegistrarTecnicoPage = () => {
 
                     <MensajeError mensaje={errores.general} />
 
-                    <button type="submit" className="boton boton--primario boton--bloque">
-                        Registrar Técnico
+                    <button type="submit" className="boton boton--primario boton--bloque" disabled={cargando}>
+                            {cargando ? 'Registrando...' : 'Registrar Técnico'}
                     </button>
                 </form>
             </div>
