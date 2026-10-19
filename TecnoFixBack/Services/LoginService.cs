@@ -21,21 +21,21 @@ public class LoginService : ILoginService
     /// </summary>
     public async Task<LoginResponseDto?> IniciarSesionAsync(LoginDto dto)
     {
-        var usuario = await _userRepository.ObtenerPorEmailAsync(dto.Email);
+        var user = await _userRepository.ObtenerPorEmailAsync(dto.Email);
 
-        if (usuario is null || !PasswordEsCorrecta(dto.Password, usuario.Password))
+        if (user is null || !PasswordEsCorrecta(dto.Password, user.password))
             return null;
 
-        var (token, expiracion) = _tokenService.GenerarToken(usuario);
+        var (token, expiracion) = _tokenService.GenerarToken(user);
 
         return new LoginResponseDto
         {
             Token = token,
             Expiracion = expiracion,
-            Id = usuario.Id,
-            NombreCompleto = usuario.NombreCompleto,
-            Email = usuario.Email,
-            Rol = usuario.Rol.Name
+            ID = user.ID,
+            name = user.name,
+            email = user.email,
+            role = user.role.name
         };
     }
 

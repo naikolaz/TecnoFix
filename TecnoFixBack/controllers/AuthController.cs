@@ -6,8 +6,6 @@ using TecnoFixBack.src.interfaces;
 
 namespace TecnoFixBack.src.controller;
 
-[ApiController]
-[Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
@@ -54,7 +52,7 @@ public class AuthController : ControllerBase
 
         try
         {
-            var resultado = await _authService.RegistrarClienteAsync(dto);
+            var resultado = await _authService.RegisterClientAsync(dto);
             return Ok(new { message = resultado });
         }
         catch (Exception ex)
@@ -74,7 +72,7 @@ public class AuthController : ControllerBase
 
         try
         {
-            var resultado = await _authService.RegistrarTecnicoAsync(dto);
+            var resultado = await _authService.RegisterTechnicianAsync(dto);
             return Ok(new { mensaje = resultado });
         }
         catch (Exception ex)

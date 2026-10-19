@@ -1,9 +1,12 @@
-using TecnoFixBack.src.interfaces;
-using TecnoFixBack.src.DTOs;
-using TecnoFixBack.src.model;
-using BCrypt.Net;
+using System;
+using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using BCrypt.Net;
 using TecnoFixBack.Services;
+using TecnoFixBack.src.DTOs;
+using TecnoFixBack.src.interfaces;
+using TecnoFixBack.src.model;
 
 namespace TecnoFixBack.src.services;
 
@@ -12,124 +15,140 @@ public class AuthService : IAuthService
     private readonly IUserRepository _userRepository;
     private readonly IEmailService _emailService;
 
-    // Inyectamos las dependencias
+    // Dependency injection
     public AuthService(IUserRepository userRepository, IEmailService emailService)
     {
         _userRepository = userRepository;
         _emailService = emailService;
     }
 
-    public async Task<string> RegistrarClienteAsync(RegistroClienteDto dto)
+    public async Task<string> RegisterClientAsync(RegistroClienteDto dto)
     {
-        // 1. Validar campos nulos o vacíos
+        // 1. Validate required fields
         if (string.IsNullOrWhiteSpace(dto.NombreCompleto) || 
             string.IsNullOrWhiteSpace(dto.Email) || 
             string.IsNullOrWhiteSpace(dto.Rut) || 
             string.IsNullOrWhiteSpace(dto.Telefono))
         {
-            throw new Exception("Todos los campos son obligatorios.");
+            throw new Exception("All fields are required.");
         }
 
-        // 2. Validar formato de correo
-        if (!ValidarFormatoEmail(dto.Email))
+        // 2. Validate email format
+        if (!ValidateEmailFormat(dto.Email))
         {
-            throw new Exception("El formato del correo electrónico no es válido.");
+            throw new Exception("The email format is invalid.");
         }
 
-        // 3. Validar RUT (Algoritmo Módulo 11)
-        if (!ValidarRut(dto.Rut))
-            throw new Exception("El RUT ingresado no es válido según el algoritmo de Chile.");
+        // 3. Validate Chilean RUT (Module 11 algorithm)
+        if (!ValidateRut(dto.Rut))
+        {
+            throw new Exception("The entered RUT is invalid according to the Chilean algorithm.");
+        }
 
-        // 4. Validar que el correo sea único
+        // 4. Check email uniqueness
         if (await _userRepository.ExisteEmailAsync(dto.Email)) 
-            throw new Exception("El correo electrónico ingresado ya se encuentra registrado.");
-        
-        // 5. Validar que el RUT sea único
-        if (await _userRepository.ExisteRutAsync(dto.Rut)) 
-            throw new Exception("El RUT ingresado ya se encuentra registrado.");
-
-        // 6. Generar y encriptar contraseña
-        string passwordTemporal = GenerarPasswordAleatorio(8);
-        string passwordHasheada = BCrypt.Net.BCrypt.HashPassword(passwordTemporal);
-
-        // 7. Crear entidad User
-        var nuevoCliente = new User
         {
-            NombreCompleto = dto.NombreCompleto,
-            Email = dto.Email,
-            Rut = dto.Rut,
-            Telefono = dto.Telefono,
-            Password = passwordHasheada, 
-            IdRol = 2 // Rol Cliente
+            throw new Exception("The entered email is already registered.");
+        }
+        
+        // 5. Check RUT uniqueness
+        if (await _userRepository.ExisteRutAsync(dto.Rut)) 
+        {
+            throw new Exception("The entered RUT is already registered.");
+        }
+
+        // 6. Generate and hash temporary password
+        string tempPassword = GenerateRandomPassword(8);
+        string hashedPassword = BCrypt.Net.BCrypt.HashPassword(tempPassword);
+
+        // 7. Instantiate User entity with exact property names
+        var newClient = new User
+        {
+            name = dto.NombreCompleto,
+            email = dto.Email,
+            RUT = dto.Rut,
+            telephoneNumber = dto.Telefono,
+            password = hashedPassword, 
+            idRole = 2 // Client Role
         };
 
-        // 8. Guardar en base de datos
-        await _userRepository.CrearUsuarioAsync(nuevoCliente);
+        // 8. Save user to database
+        await _userRepository.CrearUsuarioAsync(newClient);
 
-        // 9. Enviar correo usando el método correcto (EnviarCorreoAsync)
+        // 9. Send welcome email via SendGrid
         try
         {
-            string asunto = "Bienvenido a TecnoFix - Tus credenciales";
-            string mensajeHtml = $"<h1>Bienvenido a TecnoFix</h1><p>Hola {nuevoCliente.NombreCompleto}, tu cuenta ha sido creada. Tu contraseña temporal es: <strong>{passwordTemporal}</strong></p>";
+            string subject = "Welcome to TecnoFix - Your Credentials";
+            string htmlMessage = $"<h1>Welcome to TecnoFix</h1><p>Hello {newClient.name}, your account has been created. Your temporary password is: <strong>{tempPassword}</strong></p>";
 
-            await _emailService.EnviarCorreoAsync(nuevoCliente.Email, asunto, mensajeHtml);
+            await _emailService.EnviarCorreoAsync(newClient.email, subject, htmlMessage);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[ADVERTENCIA] Error de SendGrid: {ex.Message}");
-            return "Cliente registrado en la base de datos, pero hubo un problema al enviar el correo.";
+            Console.WriteLine($"[WARNING] SendGrid Email Error: {ex.Message}");
+            return "Client registered in database, but there was an issue sending the email.";
         }
 
-        return "Cliente registrado exitosamente. Se ha enviado la contraseña al correo.";
+        return "Client registered successfully. Temporary password sent to email.";
     }
 
-    public async Task<string> RegistrarTecnicoAsync(RegistroTecnicoDto dto)
+    public async Task<string> RegisterTechnicianAsync(RegistroTecnicoDto dto)
     {
+        // 1. Validate required fields
         if (string.IsNullOrWhiteSpace(dto.NombreCompleto) || 
             string.IsNullOrWhiteSpace(dto.Email))
         {
-            throw new Exception("Nombre y correo son obligatorios.");
+            throw new Exception("Name and email are required.");
         }
 
-        if (!ValidarFormatoEmail(dto.Email))
+        // 2. Validate email format
+        if (!ValidateEmailFormat(dto.Email))
         {
-            throw new Exception("El formato del correo electrónico no es válido.");
+            throw new Exception("The email format is invalid.");
         }
 
+        // 3. Check email uniqueness
         if (await _userRepository.ExisteEmailAsync(dto.Email)) 
-            throw new Exception("El correo electrónico ingresado ya se encuentra registrado.");
-
-        string passwordTemporal = GenerarPasswordAleatorio(8);
-        string passwordHasheada = BCrypt.Net.BCrypt.HashPassword(passwordTemporal);
-
-        var nuevoTecnico = new User
         {
-            NombreCompleto = dto.NombreCompleto,
-            Email = dto.Email,
-            Especialidad = dto.Especialidad,
-            Password = passwordHasheada, 
-            IdRol = 3, // Rol Técnico
+            throw new Exception("The entered email is already registered.");
+        }
+
+        // 4. Generate and hash temporary password
+        string tempPassword = GenerateRandomPassword(8);
+        string hashedPassword = BCrypt.Net.BCrypt.HashPassword(tempPassword);
+
+        // 5. Instantiate Technician entity
+        var newTechnician = new User
+        {
+            name = dto.NombreCompleto,
+            email = dto.Email,
+            specialization = dto.Especialidad,
+            password = hashedPassword, 
+            idRole = 3 // Technician Role
         };
 
-        await _userRepository.CrearUsuarioAsync(nuevoTecnico);
+        // 6. Save technician to database
+        await _userRepository.CrearUsuarioAsync(newTechnician);
 
+        // 7. Send notification email
         try
         {
-            string asunto = "Bienvenido a TecnoFix - Credenciales de Técnico";
-            string mensajeHtml = $"<h1>Panel Técnico TecnoFix</h1><p>Hola {nuevoTecnico.NombreCompleto}, tu cuenta de técnico ha sido creada. Tu contraseña temporal es: <strong>{passwordTemporal}</strong></p>";
+            string subject = "Welcome to TecnoFix - Technician Credentials";
+            string htmlMessage = $"<h1>TecnoFix Technician Panel</h1><p>Hello {newTechnician.name}, your technician account has been created. Your temporary password is: <strong>{tempPassword}</strong></p>";
 
-            await _emailService.EnviarCorreoAsync(nuevoTecnico.Email, asunto, mensajeHtml);
+            await _emailService.EnviarCorreoAsync(newTechnician.email, subject, htmlMessage);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[ADVERTENCIA] Error de SendGrid: {ex.Message}");
+            Console.WriteLine($"[WARNING] SendGrid Email Error: {ex.Message}");
         }
 
-        return "Técnico registrado exitosamente. Se ha enviado la contraseña al correo.";
+        return "Technician registered successfully. Temporary password sent to email.";
     }
 
-    // --- MÉTODOS PRIVADOS ---
-    private bool ValidarFormatoEmail(string email)
+    // --- PRIVATE HELPER METHODS ---
+
+    private bool ValidateEmailFormat(string email)
     {
         try
         {
@@ -141,74 +160,61 @@ public class AuthService : IAuthService
         }
     }
 
-private bool ValidarRut(string rut)
+    private bool ValidateRut(string rut)
     {
         if (string.IsNullOrWhiteSpace(rut))
             return false;
 
         try
         {
-            // 1. Limpiar puntos y guiones
-            rut = rut.Replace(".", "-").ToUpper();
-            
-            // Si viene con guión, lo separamos, si no, asumimos que el último dígito es el verificador
-            var partes = rut.Split('-');
-            if (partes.Length != 2)
-            {
-                // Por si el usuario lo ingresó sin guión pero con DV al final
-                if (rut.Length < 2) return false;
-                partes = new string[] { rut[..^1], rut[^1..] };
-            }
+            // Clean dots and hyphens, convert to uppercase
+            string cleanRut = rut.Replace(".", "").Replace("-", "").Trim().ToUpper();
 
-            string cuerpoStr = partes[0];
-            string dvStr = partes[1];
-
-            // 2. Validar que el cuerpo sea numérico
-            if (!int.TryParse(cuerpoStr, out int cuerpo))
+            if (cleanRut.Length < 2) 
                 return false;
 
-            // 3. Calcular dígito verificador con Módulo 11
-            int suma = 0;
-            int multiplicador = 2;
+            string body = cleanRut[..^1];
+            string inputDv = cleanRut[^1..];
 
-            while (cuerpo > 0)
+            if (!int.TryParse(body, out int bodyNum))
+                return false;
+
+            int sum = 0;
+            int multiplier = 2;
+
+            while (bodyNum > 0)
             {
-                int resto = cuerpo % 10;
-                suma += resto * multiplicador;
-                cuerpo /= 10;
-                multiplicador++;
-                if (multiplicador == 8)
-                {
-                    multiplicador = 2;
-                }
+                int remainder = bodyNum % 10;
+                sum += remainder * multiplier;
+                bodyNum /= 10;
+                multiplier = (multiplier == 7) ? 2 : multiplier + 1;
             }
 
-            int restoDv = 11 - (suma % 11);
-            string dvCalculado = restoDv switch
+            int dvRemainder = 11 - (sum % 11);
+            string calculatedDv = dvRemainder switch
             {
                 11 => "0",
                 10 => "K",
-                _ => restoDv.ToString()
+                _ => dvRemainder.ToString()
             };
 
-            // 4. Comparar el dígito calculado con el ingresado
-            return dvCalculado == dvStr;
+            return calculatedDv == inputDv;
         }
         catch
         {
             return false;
         }
     }
-    
-    private string GenerarPasswordAleatorio(int longitud)
-    {
-        const string caracteres = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
-        var random = new Random();
-        char[] password = new char[longitud];
 
-        for (int i = 0; i < longitud; i++)
+    private string GenerateRandomPassword(int length)
+    {
+        const string characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
+        var random = new Random();
+        char[] password = new char[length];
+
+        for (int i = 0; i < length; i++)
         {
-            password[i] = caracteres[random.Next(caracteres.Length)];
+            password[i] = characters[random.Next(characters.Length)];
         }
 
         return new string(password);

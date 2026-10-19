@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using TecnoFixBack.src.model;
+using TecnoFixBack.src.model; 
+using TecnoFixBack.Models;    
 
 namespace TecnoFixBack.src.Data;
 
@@ -7,42 +8,59 @@ public class TecnoFixContext : DbContext
 {
     public TecnoFixContext(DbContextOptions<TecnoFixContext> options) : base(options) { }
 
+    // Tablas del sistema
     public DbSet<User> Usuarios { get; set; }
-    public DbSet<Rol> Roles { get; set; }
+    public DbSet<Role> Roles { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderLog> Loggers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Configuramos las tablas y relaciones
+        // === CONFIGURACIÓN USER Y ROLE ===
         modelBuilder.Entity<User>()
-            .HasOne(u => u.Rol)
-            .WithMany(r => r.Usuarios)
-            .HasForeignKey(u => u.IdRol);
+            .HasOne(u => u.role)
+            .WithMany(r => r.Users)
+            .HasForeignKey(u => u.idRole); // Usamos idRole
 
-        // Aseguramos que Email y RUT sean únicos en la base de datos
-        modelBuilder.Entity<User>().HasIndex(u => u.Email).IsUnique();
-        modelBuilder.Entity<User>().HasIndex(u => u.Rut).IsUnique();
+        // Índices únicos con las propiedades actualizadas (Email y RUT)
+        modelBuilder.Entity<User>().HasIndex(u => u.email).IsUnique();
+        modelBuilder.Entity<User>().HasIndex(u => u.RUT).IsUnique();
 
-        // Los IDs autoincrementales parten después de los registros iniciales para no chocar con ellos
-        modelBuilder.Entity<Rol>().Property(r => r.Id).HasIdentityOptions(startValue: 4);
-        modelBuilder.Entity<User>().Property(u => u.Id).HasIdentityOptions(startValue: 2);
+        // Autoincrementales usando ID (en mayúsculas)
+        modelBuilder.Entity<Role>().Property(r => r.ID).HasIdentityOptions(startValue: 4);
+        modelBuilder.Entity<User>().Property(u => u.ID).HasIdentityOptions(startValue: 2);
 
-        // Datos iniciales: roles del sistema y el administrador (requerido para iniciar sesión y registrar técnicos)
-        modelBuilder.Entity<Rol>().HasData(
-            new Rol { Id = 1, Name = "Administrador" },
-            new Rol { Id = 2, Name = "Cliente" },
-            new Rol { Id = 3, Name = "Técnico" }
+        // Datos iniciales de roles
+        modelBuilder.Entity<Role>().HasData(
+            new Role { ID = 1, name = "Administrador" },
+            new Role { ID = 2, name = "Cliente" },
+            new Role { ID = 3, name = "Técnico" }
         );
 
+        // Usuario administrador inicial
         modelBuilder.Entity<User>().HasData(
             new User
             {
-                Id = 1,
-                NombreCompleto = "Administrador TecnoFix",
-                Email = "admin@tecnofix.cl",
-                Password = "$2a$11$p1aaLoFneaW8kzCJCPJDJe5qJlJm19DomNZtN4U7J2jm8YvlMW3p.",
+                ID = 1,
+                name = "Administrador TecnoFix", // Usamos name
+                email = "admin@tecnofix.cl",
+                password = "$2a$11$p1aaLoFneaW8kzCJCPJDJe5qJlJm19DomNZtN4U7J2jm8YvlMW3p.",
                 CreateOnly = new DateTime(2026, 9, 1, 0, 0, 0, DateTimeKind.Utc),
-                IdRol = 1
+                idRole = 1
             }
         );
+
+        // === CONFIGURACIÓN ORD-001 (Órdenes y Bitácora) ===
+        modelBuilder.Entity<Order>()
+            .HasOne(o => o.client)
+            .WithMany() 
+            .HasForeignKey(o => o.clientId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<OrderLog>()
+            .HasOne(l => l.order)
+            .WithMany(o => o.history)
+            .HasForeignKey(l => l.orderId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

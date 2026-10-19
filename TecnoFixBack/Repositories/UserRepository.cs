@@ -16,17 +16,18 @@ public class UserRepository : IUserRepository
 
     public async Task<bool> ExisteEmailAsync(string email)
     {
-        return await _context.Usuarios.AnyAsync(u => u.Email == email);
+        var emailNormalizado = email.Trim().ToLower();
+        return await _context.Set<User>().AnyAsync(u => u.email.ToLower() == emailNormalizado);
     }
 
     public async Task<bool> ExisteRutAsync(string rut)
     {
-        return await _context.Usuarios.AnyAsync(u => u.Rut == rut);
+        return await _context.Set<User>().AnyAsync(u => u.RUT == rut);
     }
 
     public async Task CrearUsuarioAsync(User user)
     {
-        await _context.Usuarios.AddAsync(user);
+        await _context.Set<User>().AddAsync(user);
         await _context.SaveChangesAsync();
     }
 
@@ -34,9 +35,9 @@ public class UserRepository : IUserRepository
     {
         var emailNormalizado = email.Trim().ToLower();
 
-        return await _context.Usuarios
+        return await _context.Set<User>()
             .AsNoTracking()
-            .Include(u => u.Rol)
-            .FirstOrDefaultAsync(u => u.Email.ToLower() == emailNormalizado);
+            .Include(u => u.role)
+            .FirstOrDefaultAsync(u => u.email.ToLower() == emailNormalizado);
     }
 }

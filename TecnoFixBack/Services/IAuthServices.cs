@@ -4,7 +4,7 @@ namespace TecnoFixBack.src.interfaces;
 
 public interface IAuthService
 {
-    Task<string> RegistrarClienteAsync(RegistroClienteDto dto);
-   Task<string> RegistrarTecnicoAsync(RegistroTecnicoDto dto);
+    Task<string> RegisterClientAsync(RegistroClienteDto dto);
+    Task<string> RegisterTechnicianAsync(RegistroTecnicoDto dto);
 }
 

@@ -20,14 +20,14 @@ public class TokenService : ITokenService
     /// Genera un JWT firmado con HMAC-SHA256 que incluye el id, correo, nombre y rol del usuario.
     /// El frontend lo envía en el encabezado Authorization para acceder a las funcionalidades según su rol.
     /// </summary>
-    public (string Token, DateTime Expiracion) GenerarToken(User usuario)
+    public (string Token, DateTime Expiracion) GenerarToken(User user)
     {
         var claims = new List<Claim>
         {
-            new(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
-            new(ClaimTypes.Email, usuario.Email),
-            new(ClaimTypes.Name, usuario.NombreCompleto),
-            new(ClaimTypes.Role, usuario.Rol.Name)
+            new(ClaimTypes.NameIdentifier, user.ID.ToString()),
+            new(ClaimTypes.Email, user.email),
+            new(ClaimTypes.Name, user.name),
+            new(ClaimTypes.Role, user.role.name)
         };
 
         var clave = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
