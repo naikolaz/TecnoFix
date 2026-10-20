@@ -1,8 +1,7 @@
-using TecnoFixBack.src.interfaces;
+using TecnoFixBack.Interfaces;
 using SendGrid;
 using SendGrid.Helpers.Mail;
-namespace TecnoFixBack.Services
-{
+namespace TecnoFixBack.Services;
     public class SendGridEmailService : IEmailService
     {
         private readonly IConfiguration _config;
@@ -34,4 +33,3 @@ namespace TecnoFixBack.Services
         
         }
     }
-}

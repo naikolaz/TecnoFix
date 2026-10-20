@@ -1,4 +1,4 @@
-namespace TecnoFixBack.src.model;
+namespace TecnoFixBack.Models;
 
 public class User{
     public int ID { get; set; }

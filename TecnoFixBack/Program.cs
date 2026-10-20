@@ -2,13 +2,11 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using TecnoFixBack.Data;
+using TecnoFixBack.Interfaces;
+using TecnoFixBack.Models;
+using TecnoFixBack.Repositories;
 using TecnoFixBack.Services;
-using TecnoFixBack.src.Data;
-using TecnoFixBack.src.interfaces;
-using TecnoFixBack.src.Repositories;
-using TecnoFixBack.src.services;
-
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,13 +15,14 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<TecnoFixContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("NeonDB")));
 
-
+// Inyección de dependencias
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>(); 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<ILoginService, LoginService>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IEmailService, SendGridEmailService>(); // <- Mantén esta
-
+builder.Services.AddScoped<IEmailService, SendGridEmailService>();
+builder.Services.AddScoped<IOrderService, OrderService>(); // <- Asegurar esta línea
 
 var jwtKey = builder.Configuration["Jwt:Key"]
     ?? throw new InvalidOperationException("Falta configurar Jwt:Key en appsettings.");
@@ -46,9 +45,6 @@ builder.Services
     });
 
 builder.Services.AddAuthorization();
-
-var origenesPermitidos = builder.Configuration.GetSection("Cors:OrigenesPermitidos").Get<string[]>()
-    ?? ["http://localhost:5173", "https://techno-fix-ochre.vercel.app"]; // Ajusta tu URL de Vercel aquí
 
 builder.Services.AddCors(options =>
 {
@@ -78,10 +74,8 @@ else
 }
 
 app.UseCors("Frontend");
-
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();

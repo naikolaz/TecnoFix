@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using TecnoFixBack.src.model; // Permite encontrar la clase User
+using System.ComponentModel.DataAnnotations.Schema; 
 
 namespace TecnoFixBack.Models;
 

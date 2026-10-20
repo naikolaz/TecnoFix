@@ -1,4 +1,4 @@
-namespace TecnoFixBack.src.DTOs;
+namespace TecnoFixBack.DTOs;
 
 public class LoginResponseDto
 {

@@ -2,10 +2,10 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
-using TecnoFixBack.src.interfaces;
-using TecnoFixBack.src.model;
+using TecnoFixBack.Interfaces;
+using TecnoFixBack.Models;
 
-namespace TecnoFixBack.src.services;
+namespace TecnoFixBack.Services;
 
 public class TokenService : ITokenService
 {

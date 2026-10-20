@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using TecnoFixBack.src.Data;
+using TecnoFixBack.Data;
 
 #nullable disable
 
@@ -93,7 +93,7 @@ namespace TecnoFixBack.Migrations
                     b.ToTable("Loggers");
                 });
 
-            modelBuilder.Entity("TecnoFixBack.src.model.Role", b =>
+            modelBuilder.Entity("TecnoFixBack.Models.Role", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
@@ -128,7 +128,7 @@ namespace TecnoFixBack.Migrations
                         });
                 });
 
-            modelBuilder.Entity("TecnoFixBack.src.model.User", b =>
+            modelBuilder.Entity("TecnoFixBack.Models.User", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
@@ -190,7 +190,7 @@ namespace TecnoFixBack.Migrations
 
             modelBuilder.Entity("TecnoFixBack.Models.Order", b =>
                 {
-                    b.HasOne("TecnoFixBack.src.model.User", "client")
+                    b.HasOne("TecnoFixBack.Models.User", "client")
                         .WithMany()
                         .HasForeignKey("clientId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -210,9 +210,9 @@ namespace TecnoFixBack.Migrations
                     b.Navigation("order");
                 });
 
-            modelBuilder.Entity("TecnoFixBack.src.model.User", b =>
+            modelBuilder.Entity("TecnoFixBack.Models.User", b =>
                 {
-                    b.HasOne("TecnoFixBack.src.model.Role", "role")
+                    b.HasOne("TecnoFixBack.Models.Role", "role")
                         .WithMany("Users")
                         .HasForeignKey("idRole")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -226,7 +226,7 @@ namespace TecnoFixBack.Migrations
                     b.Navigation("history");
                 });
 
-            modelBuilder.Entity("TecnoFixBack.src.model.Role", b =>
+            modelBuilder.Entity("TecnoFixBack.Models.Role", b =>
                 {
                     b.Navigation("Users");
                 });

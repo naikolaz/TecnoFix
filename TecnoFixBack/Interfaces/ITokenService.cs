@@ -1,6 +1,6 @@
-using TecnoFixBack.src.model;
+using TecnoFixBack.Models;
 
-namespace TecnoFixBack.src.interfaces;
+namespace TecnoFixBack.Interfaces;
 
 public interface ITokenService
 {

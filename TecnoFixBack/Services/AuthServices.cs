@@ -1,14 +1,9 @@
-using System;
-using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using BCrypt.Net;
-using TecnoFixBack.Services;
-using TecnoFixBack.src.DTOs;
-using TecnoFixBack.src.interfaces;
-using TecnoFixBack.src.model;
+using TecnoFixBack.DTOs;
+using TecnoFixBack.Interfaces;
+using TecnoFixBack.Models;
 
-namespace TecnoFixBack.src.services;
+namespace TecnoFixBack.Services;
 
 public class AuthService : IAuthService
 {

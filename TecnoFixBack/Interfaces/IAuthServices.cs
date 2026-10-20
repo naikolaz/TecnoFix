@@ -1,6 +1,6 @@
-using TecnoFixBack.src.DTOs;
+using TecnoFixBack.DTOs;
 
-namespace TecnoFixBack.src.interfaces;
+namespace TecnoFixBack.Interfaces;
 
 public interface IAuthService
 {

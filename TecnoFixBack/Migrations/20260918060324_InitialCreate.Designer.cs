@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using TecnoFixBack.src.Data;
+using TecnoFixBack.Data;
 
 #nullable disable
 
@@ -25,7 +25,7 @@ namespace TecnoFixBack.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("TecnoFixBack.src.model.Rol", b =>
+            modelBuilder.Entity("TecnoFixBack.Models.Rol", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -42,7 +42,7 @@ namespace TecnoFixBack.Migrations
                     b.ToTable("Roles");
                 });
 
-            modelBuilder.Entity("TecnoFixBack.src.model.User", b =>
+            modelBuilder.Entity("TecnoFixBack.Models.User", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -93,9 +93,9 @@ namespace TecnoFixBack.Migrations
                     b.ToTable("Usuarios");
                 });
 
-            modelBuilder.Entity("TecnoFixBack.src.model.User", b =>
+            modelBuilder.Entity("TecnoFixBack.Models.User", b =>
                 {
-                    b.HasOne("TecnoFixBack.src.model.Rol", "Rol")
+                    b.HasOne("TecnoFixBack.Models.Rol", "Rol")
                         .WithMany("Usuarios")
                         .HasForeignKey("IdRol")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -104,7 +104,7 @@ namespace TecnoFixBack.Migrations
                     b.Navigation("Rol");
                 });
 
-            modelBuilder.Entity("TecnoFixBack.src.model.Rol", b =>
+            modelBuilder.Entity("TecnoFixBack.Models.Rol", b =>
                 {
                     b.Navigation("Usuarios");
                 });

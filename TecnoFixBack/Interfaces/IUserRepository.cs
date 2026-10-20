@@ -1,6 +1,6 @@
-using TecnoFixBack.src.model;
-
-namespace TecnoFixBack.src.interfaces;
+using TecnoFixBack.Models;
+    
+namespace TecnoFixBack.Interfaces;
 
 public interface IUserRepository
 {

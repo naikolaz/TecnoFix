@@ -1,11 +1,15 @@
+using System;
 using System.Security.Claims;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TecnoFixBack.src.DTOs;
-using TecnoFixBack.src.interfaces;
+using TecnoFixBack.DTOs;
+using TecnoFixBack.Interfaces;
 
-namespace TecnoFixBack.src.controller;
+namespace TecnoFixBack.Controllers;
 
+[ApiController]
+[Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
@@ -35,7 +39,7 @@ public class AuthController : ControllerBase
         return Ok(new
         {
             id = User.FindFirstValue(ClaimTypes.NameIdentifier),
-            nombreCompleto = User.FindFirstValue(ClaimTypes.Name),
+            nombreCompleto = User.FindFirstValue("nombreCompleto"),
             email = User.FindFirstValue(ClaimTypes.Email),
             rol = User.FindFirstValue(ClaimTypes.Role)
         });
@@ -46,7 +50,6 @@ public class AuthController : ControllerBase
     {
         if (!ModelState.IsValid)
         {
-            // Retorna los mensajes de validación definidos en el DTO (ej. "Debe completar el campo X")
             return BadRequest(ModelState); 
         }
 
@@ -81,3 +84,4 @@ public class AuthController : ControllerBase
         }
     }
 }
+

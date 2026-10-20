@@ -1,7 +1,7 @@
-using TecnoFixBack.src.DTOs;
-using TecnoFixBack.src.interfaces;
+using TecnoFixBack.DTOs;
+using TecnoFixBack.Interfaces;
 
-namespace TecnoFixBack.src.services;
+namespace TecnoFixBack.Services;
 
 public class LoginService : ILoginService
 {
