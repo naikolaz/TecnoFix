@@ -22,6 +22,87 @@ namespace TecnoFixBack.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("TecnoFixBack.Models.Brand", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Brands");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Asus"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "HP"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Lenovo"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Dell"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Apple"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "Samsung"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "Acer"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "MSI"
+                        });
+                });
+
+            modelBuilder.Entity("TecnoFixBack.Models.DeviceModel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BrandId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BrandId");
+
+                    b.ToTable("Models");
+                });
+
             modelBuilder.Entity("TecnoFixBack.Models.Order", b =>
                 {
                     b.Property<int>("id")
@@ -29,6 +110,9 @@ namespace TecnoFixBack.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("id"));
+
+                    b.Property<int?>("ClientId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("accessories")
                         .HasColumnType("text");
@@ -59,6 +143,8 @@ namespace TecnoFixBack.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("id");
+
+                    b.HasIndex("ClientId");
 
                     b.HasIndex("clientId");
 
@@ -171,7 +257,7 @@ namespace TecnoFixBack.Migrations
 
                     b.HasIndex("idRole");
 
-                    b.ToTable("Usuarios");
+                    b.ToTable("Users");
 
                     b.HasData(
                         new
@@ -185,13 +271,30 @@ namespace TecnoFixBack.Migrations
                         });
                 });
 
+            modelBuilder.Entity("TecnoFixBack.Models.DeviceModel", b =>
+                {
+                    b.HasOne("TecnoFixBack.Models.Brand", "Brand")
+                        .WithMany("Models")
+                        .HasForeignKey("BrandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Brand");
+                });
+
             modelBuilder.Entity("TecnoFixBack.Models.Order", b =>
                 {
+                    b.HasOne("TecnoFixBack.Models.User", "Client")
+                        .WithMany()
+                        .HasForeignKey("ClientId");
+
                     b.HasOne("TecnoFixBack.Models.User", "client")
                         .WithMany()
                         .HasForeignKey("clientId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Client");
 
                     b.Navigation("client");
                 });
@@ -216,6 +319,11 @@ namespace TecnoFixBack.Migrations
                         .IsRequired();
 
                     b.Navigation("role");
+                });
+
+            modelBuilder.Entity("TecnoFixBack.Models.Brand", b =>
+                {
+                    b.Navigation("Models");
                 });
 
             modelBuilder.Entity("TecnoFixBack.Models.Order", b =>

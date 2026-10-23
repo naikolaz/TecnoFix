@@ -8,4 +8,5 @@ public interface IUserRepository
     Task<bool> ExisteRutAsync(string rut);
     Task CrearUsuarioAsync(User user);
     Task<User?> ObtenerPorEmailAsync(string email);
+    Task<User?> ObtenerPorIdAsync(int id);
 }

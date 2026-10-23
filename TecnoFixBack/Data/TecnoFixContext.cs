@@ -7,10 +7,12 @@ public class TecnoFixContext : DbContext
 {
     public TecnoFixContext(DbContextOptions<TecnoFixContext> options) : base(options) { }
 
-    public DbSet<User> Usuarios { get; set; }
-    public DbSet<Role> Roles { get; set; }
-    public DbSet<Order> Orders { get; set; }
-    public DbSet<OrderLog> Loggers { get; set; }
+    public DbSet<Order> Orders { get; set; } = null!;
+    public DbSet<OrderLog> Loggers { get; set; } = null!;
+    public DbSet<User> Users { get; set; } = null!;
+    public DbSet<Role> Roles { get; set; } = null!;
+    public DbSet<Brand> Brands { get; set; } = null!;
+    public DbSet<DeviceModel> Models { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -54,5 +56,16 @@ public class TecnoFixContext : DbContext
             .WithMany(o => o.history)
             .HasForeignKey(l => l.orderId)
             .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Brand>().HasData(
+            new Brand { Id = 1, Name = "Asus" },
+            new Brand { Id = 2, Name = "HP" },
+            new Brand { Id = 3, Name = "Lenovo" },
+            new Brand { Id = 4, Name = "Dell" },
+            new Brand { Id = 5, Name = "Apple" },
+            new Brand { Id = 6, Name = "Samsung" },
+            new Brand { Id = 7, Name = "Acer" },
+            new Brand { Id = 8, Name = "MSI" }
+        );
     }
 }

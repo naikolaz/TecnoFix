@@ -9,6 +9,9 @@ public class Order
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+
+    [ForeignKey("ClientId")]
+    public User? Client { get; set; }
     public int id { get; set; }
 
     [Required(ErrorMessage = "Debe completar el campo Cliente")]

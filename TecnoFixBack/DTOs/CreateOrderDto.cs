@@ -1,23 +1,32 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+
 namespace TecnoFixBack.DTOs;
 
 public class CreateOrderDto
 {
-    [Required(ErrorMessage = "ClienteId es obligatorio.")]
+    [Required]
+    [JsonPropertyName("clientId")]
     public int ClientId { get; set; }
 
-    [Required(ErrorMessage = "DeviceType es obligatorio.")]
+    [Required]
+    [JsonPropertyName("deviceType")]
     public string DeviceType { get; set; } = string.Empty;
 
+    [Required]
+    [JsonPropertyName("brand")]
+    public string Brand { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "DeviceBrand es obligatorio.")]
-    public string DeviceBrand { get; set; } = string.Empty;
-    
-    public string? serialNumber{ get; set; }
+    [JsonPropertyName("model")]
+    public string? Model { get; set; }
 
+    [JsonPropertyName("serialNumber")]
+    public string? SerialNumber { get; set; }
 
+    [Required]
+    [JsonPropertyName("issueDescription")]
+    public string IssueDescription { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "ProblemDescription es obligatorio.")] 
-    public string ProblemDescription { get; set; } = string.Empty;
-    public string? accessories { get; set; }
+    [JsonPropertyName("accessories")]
+    public string? Accessories { get; set; }
 }

@@ -7,14 +7,18 @@ export interface OpcionMenu {
   disponible: boolean
 }
 
-
-
 export const MENU_POR_ROL: Record<Rol, OpcionMenu[]> = {
   Administrador: [
     {
       titulo: 'Registrar técnico',
       descripcion: 'Crea la cuenta de un nuevo técnico del servicio.',
       ruta: '/tecnicos/registrar',
+      disponible: true,
+    },
+    {
+      titulo: 'Registrar orden',
+      descripcion: 'Ingresa un nuevo equipo al taller para reparación.',
+      ruta: '/ordenes/nueva',
       disponible: true,
     },
     {
@@ -29,16 +33,20 @@ export const MENU_POR_ROL: Record<Rol, OpcionMenu[]> = {
       ruta: '/estadisticas',
       disponible: false,
     },
-
   ],
   Técnico: [
     {
+      titulo: 'Registrar orden',
+      descripcion: 'Ingresa un nuevo equipo al taller para reparación.',
+      ruta: '/ordenes/nueva',
+      disponible: true,
+    },
+    {
       titulo: 'Órdenes de reparación',
-      descripcion: 'Registra órdenes, diagnostica y actualiza su estado.',
+      descripcion: 'Diagnostica y actualiza el estado de las órdenes existentes.',
       ruta: '/ordenes',
       disponible: false,
     },
-
   ],
   Cliente: [
     {
@@ -47,6 +55,5 @@ export const MENU_POR_ROL: Record<Rol, OpcionMenu[]> = {
       ruta: '/mis-ordenes',
       disponible: false,
     },
-
   ],
 }

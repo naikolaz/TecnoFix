@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../config/api';
 import { obtenerMensajeError } from '../utils/errores';
+import { mostrarConfirmacion, mostrarExito, mostrarError } from '../utils/dialogo';
 
 interface FormularioRegistro {
   nombreCompleto: string;
@@ -29,7 +30,7 @@ export default function RegistroCliente() {
     setFieldErrors(prev => ({ ...prev, [name]: '' }));
   };
 
-  // ── CORRECCIÓN 1: validate() ahora cierra correctamente y retorna boolean ──
+  // ── VALIDACIÓN FORMULARIO ──────────────────────────────────────────────────
   const validate = (): boolean => {
     const errors: Partial<FormularioRegistro> = {};
 
@@ -43,37 +44,62 @@ export default function RegistroCliente() {
       errors.email = 'El correo electrónico no tiene un formato válido';
     }
 
+    // Acepta K/k en minúscula y mayúscula, valida RUT sin o con guion/puntos
+    const rutLimpio = formData.rut.replace(/[^0-9kK]/g, '').toUpperCase();
+
     if (!formData.rut.trim()) {
       errors.rut = 'Debe completar el campo RUT';
-    } else if (formData.rut.includes('.') || formData.rut.includes('-')) {
-      errors.rut = 'El RUT debe ingresarse sin puntos ni guion (ej.: 12345670K)';
+    } else if (rutLimpio.length < 8 || rutLimpio.length > 9) {
+      errors.rut = 'El RUT ingresado no es válido (ej: 12345678K o 12345678-k)';
     }
 
     if (!formData.telefono.trim()) {
       errors.telefono = 'Debe completar el campo Teléfono de contacto';
-    } else if (!/^\+?\d{10,11}$/.test(formData.telefono)) {
-      errors.telefono = 'El teléfono debe tener 11 caracteres máximo (ej: +56912345678)';
+    } else if (!/^\+?\d{9,12}$/.test(formData.telefono.replace(/\s/g, ''))) {
+      errors.telefono = 'El teléfono debe tener un formato válido (ej: +56912345678)';
     }
 
-    // CORRECCIÓN 1a: registrar errores en el estado y retornar resultado
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
-  }; // ← cierre correcto de validate()
+  };
 
-  // ── CORRECCIÓN 2: handleSubmit ahora está fuera de validate() ──
+  // ── ENVÍO DE FORMULARIO CON CONFIRMACIÓN NF01 ──────────────────────────────
   const handleSubmit = async () => {
     setError(null);
     setMensajeExito(false);
-    if (!validate()) return;
-    if (!window.confirm('¿Está seguro de registrar este cliente?')) return;
 
+    if (!validate()) return;
+
+    // 1. Mostrar diálogo de confirmación NF01 con SweetAlert2
+    const confirmado = await mostrarConfirmacion({
+      titulo: 'Confirmación de Registro (NF01)',
+      mensaje: '¿Está seguro de registrar este nuevo cliente en el sistema TecnoFix?',
+      textoBotonConfirmar: 'Sí, registrar',
+      textoBotonCancelar: 'Cancelar'
+    });
+
+    if (!confirmado) return;
+
+    // 2. Procesar registro en backend
     setLoading(true);
     try {
-      await api.post('/auth/registrar-cliente', formData);
+      // Formateamos RUT asegurando 'K' mayúscula limpia para enviar al servidor
+      const rutFormateado = formData.rut.replace(/[^0-9kK]/g, '').toUpperCase();
+
+      await api.post('/auth/registrar-cliente', {
+        ...formData,
+        rut: rutFormateado
+      });
+
       setMensajeExito(true);
+      mostrarExito('¡Registro Exitoso!', 'El cliente ha sido registrado. La contraseña temporal fue enviada a su correo.');
+      
+      // Limpiar formulario
       setFormData({ nombreCompleto: '', email: '', rut: '', telefono: '' });
     } catch (e: any) {
-      setError(obtenerMensajeError(e));
+      const msgError = obtenerMensajeError(e);
+      setError(msgError);
+      mostrarError('Error al registrar', msgError);
     } finally {
       setLoading(false);
     }
@@ -163,12 +189,12 @@ export default function RegistroCliente() {
             id="rut"
             name="rut"
             type="text"
-            placeholder="12345670K"
+            placeholder="12345678K o 12345678-k"
             value={formData.rut}
             onChange={handleChange}
             error={fieldErrors.rut}
-            tooltip="Sin puntos ni guion (ej.: 12345670K)"
-            maxLength={9}
+            tooltip="Acepta dígito K en minúscula o mayúscula"
+            maxLength={10}
           />
 
           {/* Campo teléfono */}
@@ -181,8 +207,8 @@ export default function RegistroCliente() {
             value={formData.telefono}
             onChange={handleChange}
             error={fieldErrors.telefono}
-            tooltip="Numero mas prefijo (ej: +56912345678)"
-           maxLength={12}
+            tooltip="Número con prefijo (ej: +56912345678)"
+            maxLength={13}
           />
 
           <button

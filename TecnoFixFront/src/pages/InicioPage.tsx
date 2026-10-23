@@ -1,42 +1,45 @@
-import { Link } from 'react-router-dom'
-import { MENU_POR_ROL } from '../config/menuPorRol'
-import { useAuth } from '../context/useAuth'
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../context/useAuth';
+import { MENU_POR_ROL } from '../config/menuPorRol';
 
-function InicioPage() {
-  const { usuario } = useAuth()
-  if (!usuario) return null
+export default function InicioPage() {
+  const { usuario } = useAuth();
 
-  const opciones = MENU_POR_ROL[usuario.rol]
+  const obtenerNombreRol = () => {
+    if (usuario?.rol) return usuario.rol;
+    const roleId = (usuario as any)?.idRole || usuario?.id;
+    if (roleId === 1) return 'Administrador';
+    if (roleId === 2) return 'Técnico';
+    return 'Cliente';
+  };
+
+  const nombreRol = obtenerNombreRol() as keyof typeof MENU_POR_ROL;
+  const opciones = MENU_POR_ROL[nombreRol] || [];
 
   return (
-    <section className="inicio">
-      <h1>Hola, {usuario.nombreCompleto}</h1>
+    <div className="inicio">
+      <h1>Bienvenido, {usuario?.email}</h1>
       <p className="texto-suave">
-        Ingresaste como <strong>{usuario.rol}</strong>. Estas son las opciones disponibles para tu rol.
+        Rol asignado: <span className="insignia-rol">{nombreRol}</span>
       </p>
 
       <div className="grilla-opciones">
-        {opciones.map((opcion) =>
+        {opciones.map((opcion, index) =>
           opcion.disponible ? (
-            <Link key={opcion.ruta} to={opcion.ruta} className="tarjeta-opcion">
+            <Link key={index} to={opcion.ruta} className="tarjeta-opcion">
               <h2>{opcion.titulo}</h2>
               <p>{opcion.descripcion}</p>
             </Link>
           ) : (
-            <div
-              key={opcion.ruta}
-              className="tarjeta-opcion tarjeta-opcion--inactiva"
-              title="Esta funcionalidad estará disponible en una próxima iteración"
-            >
+            <div key={index} className="tarjeta-opcion tarjeta-opcion--inactiva">
               <h2>{opcion.titulo}</h2>
               <p>{opcion.descripcion}</p>
               <span className="etiqueta-proximamente">Próximamente</span>
             </div>
-          ),
+          )
         )}
       </div>
-    </section>
-  )
+    </div>
+  );
 }
-
-export default InicioPage

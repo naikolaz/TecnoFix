@@ -72,17 +72,51 @@ public class AuthService : IAuthService
 
         // 9. Send welcome email via SendGrid
         try
-        {
-            string subject = "Welcome to TecnoFix - Your Credentials";
-            string htmlMessage = $"<h1>Welcome to TecnoFix</h1><p>Hello {newClient.name}, your account has been created. Your temporary password is: <strong>{tempPassword}</strong></p>";
+{
+    string subject = "Bienvenido a TecnoFix - Tus credenciales de acceso";
+    string htmlMessage = $@"
+    <!DOCTYPE html>
+    <html lang='es'>
+    <head>
+        <meta charset='UTF-8'>
+        <style>
+            body {{ font-family: 'Segoe UI', Helvetica, Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }}
+            .card {{ max-width: 550px; margin: 0 auto; background: #ffffff; border-radius: 8px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }}
+            .header {{ background-color: #0056b3; color: #ffffff; padding: 24px; text-align: center; }}
+            .header h1 {{ margin: 0; font-size: 22px; font-weight: 700; }}
+            .body {{ padding: 32px; color: #2d3748; line-height: 1.6; }}
+            .password-box {{ background-color: #f0f7ff; border: 1px dashed #0056b3; border-left: 4px solid #0056b3; padding: 16px; margin: 20px 0; border-radius: 6px; text-align: center; font-size: 20px; font-weight: bold; letter-spacing: 2px; color: #0056b3; }}
+            .footer {{ background-color: #f8fafc; padding: 16px; text-align: center; font-size: 12px; color: #718096; border-top: 1px solid #e2e8f0; }}
+        </style>
+    </head>
+    <body>
+        <div class='card'>
+            <div class='header'>
+                <h1>Sistema TecnoFix</h1>
+            </div>
+            <div class='body'>
+                <p>Hola <strong>{newClient.name}</strong>,</p>
+                <p>Tu cuenta de cliente ha sido registrada exitosamente en nuestra plataforma de soporte técnico.</p>
+                <p>A continuación se detalla tu contraseña temporal de acceso:</p>
+                <div class='password-box'>
+                    {tempPassword}
+                </div>
+                <p style='font-size: 13px; color: #718096;'>Te recomendamos iniciar sesión y cambiar esta contraseña en tu primer ingreso por seguridad.</p>
+            </div>
+            <div class='footer'>
+                <p>© TecnoFix - Gestión de Servicio Técnico</p>
+            </div>
+        </div>
+    </body>
+    </html>";
 
-            await _emailService.EnviarCorreoAsync(newClient.email, subject, htmlMessage);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[WARNING] SendGrid Email Error: {ex.Message}");
-            return "Client registered in database, but there was an issue sending the email.";
-        }
+    await _emailService.EnviarCorreoAsync(newClient.email, subject, htmlMessage);
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"[WARNING] SendGrid Email Error: {ex.Message}");
+    return "Client registered in database, but there was an issue sending the email.";
+}
 
         return "Client registered successfully. Temporary password sent to email.";
     }
@@ -126,17 +160,53 @@ public class AuthService : IAuthService
         await _userRepository.CrearUsuarioAsync(newTechnician);
 
         // 7. Send notification email
-        try
-        {
-            string subject = "Welcome to TecnoFix - Technician Credentials";
-            string htmlMessage = $"<h1>TecnoFix Technician Panel</h1><p>Hello {newTechnician.name}, your technician account has been created. Your temporary password is: <strong>{tempPassword}</strong></p>";
+       // 7. Send notification email
+try
+{
+    string subject = "Bienvenido al Panel Técnico de TecnoFix";
+    string htmlMessage = $@"
+    <!DOCTYPE html>
+    <html lang='es'>
+    <head>
+        <meta charset='UTF-8'>
+        <style>
+            body {{ font-family: 'Segoe UI', Helvetica, Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; }}
+            .card {{ max-width: 550px; margin: 0 auto; background: #ffffff; border-radius: 8px; border: 1px solid #e2e8f0; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }}
+            .header {{ background-color: #0056b3; color: #ffffff; padding: 24px; text-align: center; }}
+            .header h1 {{ margin: 0; font-size: 22px; font-weight: 700; }}
+            .body {{ padding: 32px; color: #2d3748; line-height: 1.6; }}
+            .badge {{ display: inline-block; background-color: #e2e8f0; color: #4a5568; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }}
+            .password-box {{ background-color: #f0f7ff; border: 1px dashed #0056b3; border-left: 4px solid #0056b3; padding: 16px; margin: 20px 0; border-radius: 6px; text-align: center; font-size: 20px; font-weight: bold; letter-spacing: 2px; color: #0056b3; }}
+            .footer {{ background-color: #f8fafc; padding: 16px; text-align: center; font-size: 12px; color: #718096; border-top: 1px solid #e2e8f0; }}
+        </style>
+    </head>
+    <body>
+        <div class='card'>
+            <div class='header'>
+                <h1>Panel Técnico - TecnoFix</h1>
+            </div>
+            <div class='body'>
+                <p>Hola <strong>{newTechnician.name}</strong>,</p>
+                <p>Se ha creado tu perfil de técnico especializado <span class='badge'>{newTechnician.specialization ?? "General"}</span> en el sistema.</p>
+                <p>Tus credenciales para ingresar al panel son las siguientes:</p>
+                <div class='password-box'>
+                    {tempPassword}
+                </div>
+                <p style='font-size: 13px; color: #718096;'>Por favor, ingresa al sistema y actualiza tu clave personal.</p>
+            </div>
+            <div class='footer'>
+                <p>© TecnoFix - Área Técnica</p>
+            </div>
+        </div>
+    </body>
+    </html>";
 
-            await _emailService.EnviarCorreoAsync(newTechnician.email, subject, htmlMessage);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[WARNING] SendGrid Email Error: {ex.Message}");
-        }
+    await _emailService.EnviarCorreoAsync(newTechnician.email, subject, htmlMessage);
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"[WARNING] SendGrid Email Error: {ex.Message}");
+}
 
         return "Technician registered successfully. Temporary password sent to email.";
     }

@@ -4,6 +4,8 @@ namespace TecnoFixBack.Interfaces;
 
 public interface IOrderRepository
 {
-    Task<Order> CreateOrderAsync(Order order, OrderLog initialLog);
-    Task<bool> ClientExistsAsync(int clientId);
+    Task<Order> CreateAsync(Order order);
+    Task<IEnumerable<Order>> GetAllAsync();
+    Task<Order?> GetByIdAsync(int id);
+    Task<IEnumerable<Order>> GetByClientIdAsync(int clientId);
 }

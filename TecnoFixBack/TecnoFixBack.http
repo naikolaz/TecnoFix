@@ -1,17 +1,28 @@
 @host = http://localhost:5199
-@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjIiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJhZG1pbkB0ZWNub2ZpeC5jb20iLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiSnVhbiBQZXJleiIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkFkbWluaXN0cmFkb3IiLCJleHAiOjE3OTI0NTk1MjQsImlzcyI6IlRlY25vRml4QmFjayIsImF1ZCI6IlRlY25vRml4RnJvbnQifQ.h6bgjsdaD_gVpc5k4p6HbDvu424T4f-EXhQjV5iatSQ",
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1laWRlbnRpZmllciI6IjIiLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9lbWFpbGFkZHJlc3MiOiJhZG1pbkB0ZWNub2ZpeC5jb20iLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9uYW1lIjoiSnVhbiBQZXJleiIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6IkFkbWluaXN0cmFkb3IiLCJleHAiOjE3OTI3NzYzODgsImlzcyI6IlRlY25vRml4QmFjayIsImF1ZCI6IlRlY25vRml4RnJvbnQifQ.91rvqAUaMnBHp4hfPbg0H4Y8lh97TR9HDiSqzGzemFc
   "expiracion": "2026-10-20T01:25:24.902477Z
+
+
+### Iniciar Sesión (Login)
+POST {{host}}/api/Auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@tecnofix.com",
+  "password": ""
+}
 
 ### Registrar Orden de Reparación (ORD-001)
 POST {{host}}/api/Order
-Content-Type: application/json
 Authorization: Bearer {{token}}
+Content-Type: application/json
 
 {
-  "clientId": 2,
+  "clientId": 9,
   "deviceType": "Notebook",
-  "brandAndModel": "Asus TUF Gaming F15",
-  "serialNumber": "SN-9948210",
-  "issueDescription": "No enciende tras bajón de voltaje, parpadea el LED de carga.",
-  "accessories": "Cargador original y funda protectora"
+  "brand": "Msi",
+  "model": "Cyborg 12",
+  "serialNumber": "MSI-2131231512",
+  "issueDescription": "Pc se congela",
+  "accessories": "Cargador original"
 }

@@ -1,11 +1,11 @@
 using TecnoFixBack.DTOs;
 
-using TecnoFixBack.Models;
-
-
 namespace TecnoFixBack.Interfaces;
 
 public interface IOrderService
 {
-    Task<Order> CreateOrderAsync(CreateOrderDto dto, int currentUserId);
+    Task<OrderResponseDto> CreateOrderAsync(CreateOrderDto dto);
+    Task<IEnumerable<OrderResponseDto>> GetAllOrdersAsync();
+    Task<OrderResponseDto?> GetOrderByIdAsync(int id);
+    Task<IEnumerable<OrderResponseDto>> GetOrdersByClientIdAsync(int clientId);
 }

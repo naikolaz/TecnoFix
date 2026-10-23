@@ -19,24 +19,17 @@ public class OrderController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto dto)
+public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDto dto)
+{
+    try
     {
-        try
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
-                           ?? User.FindFirst("sub")?.Value;
-
-            if (!int.TryParse(userIdClaim, out int currentUserId))
-            {
-                return Unauthorized(new { message = "Invalid user credentials in token." });
-            }
-
-            var createdOrder = await _orderService.CreateOrderAsync(dto, currentUserId);
-            return Ok(new { message = "Order created successfully.", orderId = createdOrder.id });
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(new { message = ex.Message });
-        }
+        // Pasar únicamente dto
+        var result = await _orderService.CreateOrderAsync(dto);
+        return Ok(result);
     }
+    catch (ArgumentException ex)
+    {
+        return BadRequest(new { message = ex.Message });
+    }
+}
 }
