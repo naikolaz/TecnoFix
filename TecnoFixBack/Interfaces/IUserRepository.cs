@@ -9,4 +9,6 @@ public interface IUserRepository
     Task CrearUsuarioAsync(User user);
     Task<User?> ObtenerPorEmailAsync(string email);
     Task<User?> ObtenerPorIdAsync(int id);
+    Task<IEnumerable<User>> ObtenerClientesAsync(CancellationToken cancellationToken = default);
 }
+

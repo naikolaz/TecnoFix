@@ -11,20 +11,21 @@ using TecnoFixBack.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
-
 builder.Services.AddDbContext<TecnoFixContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("NeonDB")));
 
 // Inyección de dependencias
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IOrderRepository, OrderRepository>(); 
+
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IEmailService, SendGridEmailService>();
-builder.Services.AddScoped<IOrderService, OrderService>(); // <- Asegurar esta línea
+builder.Services.AddScoped<IOrderService, OrderService>(); // Corrección aquí
 
-var jwtKey = builder.Configuration["Jwt:Key"]
+
+var jwtKey = builder.Configuration["Jwt:Key"] 
     ?? throw new InvalidOperationException("Falta configurar Jwt:Key en appsettings.");
 
 builder.Services
@@ -46,13 +47,12 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
+// Corrección del cierre en CORS
 builder.Services.AddCors(options =>
-{
     options.AddPolicy("Frontend", policy =>
         policy.AllowAnyOrigin()
               .AllowAnyHeader()
-              .AllowAnyMethod());
-});
+              .AllowAnyMethod()));
 
 builder.Services.AddOpenApi();
 

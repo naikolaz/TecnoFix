@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -14,11 +15,13 @@ public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
     private readonly ILoginService _loginService;
+    private readonly IUserRepository _userRepository; // Se usa la interfaz
 
-    public AuthController(IAuthService authService, ILoginService loginService)
+    public AuthController(IAuthService authService, ILoginService loginService, IUserRepository userRepository)
     {
         _authService = authService;
         _loginService = loginService;
+        _userRepository = userRepository; // Se inyecta la interfaz
     }
 
     [HttpPost("login")]
@@ -83,5 +86,29 @@ public class AuthController : ControllerBase
             return BadRequest(new { error = ex.Message });
         }
     }
-}
 
+    [HttpGet("clientes")]
+    [Authorize]
+    public async Task<IActionResult> ObtenerClientes()
+    {
+        try
+        {
+            var clientes = await _userRepository.ObtenerClientesAsync();
+
+            var resultado = clientes.Select(c => new
+            {
+                id = c.ID,
+                name = c.name,
+                email = c.email,
+                rut = c.RUT,
+                telephoneNumber = c.telephoneNumber
+            });
+
+            return Ok(resultado);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error interno al obtener clientes.", detail = ex.Message });
+        }
+    }
+}

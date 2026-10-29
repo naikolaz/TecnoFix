@@ -45,4 +45,20 @@ public class UserRepository : IUserRepository
 {
     return await _context.Users.FindAsync(id);
 }
+
+public async Task<IEnumerable<User>> ObtenerClientesAsync()
+{
+    return await _context.Users
+        .Where(u => u.idRole == 2) // Solo clientes
+        .OrderBy(u => u.name)
+        .ToListAsync();
+}
+
+public async Task<IEnumerable<User>> ObtenerClientesAsync(CancellationToken cancellationToken = default)
+{
+    return await _context.Users
+        .Where(u => u.idRole == 2)
+        .OrderBy(u => u.name)
+        .ToListAsync(cancellationToken);
+}
 }
