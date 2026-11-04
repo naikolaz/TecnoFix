@@ -1,20 +1,22 @@
 import { isAxiosError } from 'axios'
-import { MENSAJES_LOGIN } from '../config/constantes'
+import { LOGIN_MESSAGES } from '../config/constantes'
 
-interface RespuestaError {
+interface ErrorResponse {
   error?: string
   message?: string
   errors?: Record<string, string[]>
 }
 
-export const obtenerMensajeError = (error: unknown): string => {
-  if (!isAxiosError<RespuestaError>(error)) return 'Ocurrió un error inesperado.'
-  if (!error.response) return MENSAJES_LOGIN.sinConexion
+export const getErrorMessage = (error: unknown): string => {
+  if (!isAxiosError<ErrorResponse>(error)) return 'Ocurrió un error inesperado.'
+  if (!error.response) return LOGIN_MESSAGES.networkError
 
-  const datos = error.response.data
-  if (datos?.error) return datos.error
-  if (datos?.errors) return Object.values(datos.errors).flat()[0] ?? 'Datos inválidos.'
-  if (datos?.message) return datos.message
+  const data = error.response.data
+  if (data?.error) return data.error
+  if (data?.errors) return Object.values(data.errors).flat()[0] ?? 'Datos inválidos.'
+  if (data?.message) return data.message
 
   return 'Ocurrió un error inesperado.'
 }
+
+export const obtenerMensajeError = getErrorMessage

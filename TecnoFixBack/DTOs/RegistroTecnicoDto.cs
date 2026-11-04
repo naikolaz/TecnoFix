@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace TecnoFixBack.src.DTOs;
+namespace TecnoFixBack.DTOs;
 
 public class RegistroTecnicoDto
 {

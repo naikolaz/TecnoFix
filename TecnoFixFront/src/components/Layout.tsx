@@ -1,50 +1,54 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
-import { MENU_POR_ROL } from '../config/menuPorRol'
-import { useAuth } from '../context/useAuth'
-import Logo from './Logo'
+import { Outlet, Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/useAuth';
+import { MENU_BY_ROLE } from '../config/menuPorRol';
+import Logo from './Logo';
 
-function Layout() {
-  const { usuario, cerrarSesion } = useAuth()
-  const navegar = useNavigate()
+export default function Layout() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
-  if (!usuario) return null
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
-  const opciones = MENU_POR_ROL[usuario.rol].filter((opcion) => opcion.disponible)
+  const userRole = user?.role || 'Cliente';
+  
+  // Find menu options for user role
+  const roleKey = (Object.keys(MENU_BY_ROLE).find(
+    (key) => key.toLowerCase() === userRole.toLowerCase()
+  ) || 'Cliente') as keyof typeof MENU_BY_ROLE;
 
-  const salir = () => {
-    cerrarSesion()
-    navegar('/login', { replace: true })
-  }
+  const menuOptions = MENU_BY_ROLE[roleKey] || [];
+  const visibleOptions = menuOptions.filter((option) => option.isAvailable);
 
   return (
     <div className="layout">
       <header className="barra">
-        <NavLink to="/inicio" className="barra__marca">
-          <Logo tamano={34} claro />
-        </NavLink>
-        <nav className="barra__menu" aria-label="Menú principal">
-          <NavLink to="/inicio" end>
-            Inicio
-          </NavLink>
-          {opciones.map((opcion) => (
-            <NavLink key={opcion.ruta} to={opcion.ruta}>
-              {opcion.titulo}
-            </NavLink>
+        <Link to="/inicio" className="barra__marca">
+          <Logo />
+        </Link>
+
+        <nav className="barra__menu">
+          {visibleOptions.map((option, index) => (
+            <Link key={index} to={option.route}>
+              {option.title}
+            </Link>
           ))}
         </nav>
+
         <div className="barra__usuario">
-          <span className="barra__nombre">{usuario.nombreCompleto}</span>
-          <span className="insignia-rol">{usuario.rol}</span>
-          <button type="button" className="boton boton--claro" onClick={salir} title="Cerrar la sesión actual">
+          <span className="barra__nombre">{user?.fullName || user?.email}</span>
+          <span className="insignia-rol">{userRole}</span>
+          <button type="button" onClick={handleLogout} className="boton boton--claro">
             Cerrar sesión
           </button>
         </div>
       </header>
+
       <main className="contenido">
         <Outlet />
       </main>
     </div>
-  )
+  );
 }
-
-export default Layout

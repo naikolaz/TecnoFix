@@ -1,7 +1,7 @@
-using TecnoFixBack.src.DTOs;
-using TecnoFixBack.src.interfaces;
+using TecnoFixBack.DTOs;
+using TecnoFixBack.Interfaces;
 
-namespace TecnoFixBack.src.services;
+namespace TecnoFixBack.Services;
 
 public class LoginService : ILoginService
 {
@@ -15,35 +15,34 @@ public class LoginService : ILoginService
     }
 
     /// <summary>
-    /// USU-001: valida el correo y la contraseña contra la base de datos.
-    /// Retorna null si el correo no existe o la contraseña no coincide con el hash almacenado,
-    /// sin distinguir cuál de los dos falló para no revelar qué correos están registrados.
+    /// USU-001: Validates email and password against the database.
+    /// Returns null if user does not exist or password does not match.
     /// </summary>
-    public async Task<LoginResponseDto?> IniciarSesionAsync(LoginDto dto)
+    public async Task<LoginResponseDto?> LoginAsync(LoginDto dto)
     {
-        var usuario = await _userRepository.ObtenerPorEmailAsync(dto.Email);
+        var user = await _userRepository.GetByEmailAsync(dto.Email);
 
-        if (usuario is null || !PasswordEsCorrecta(dto.Password, usuario.Password))
+        if (user is null || !VerifyPassword(dto.Password, user.password))
             return null;
 
-        var (token, expiracion) = _tokenService.GenerarToken(usuario);
+        var (token, expiration) = _tokenService.GenerateToken(user);
 
         return new LoginResponseDto
         {
             Token = token,
-            Expiracion = expiracion,
-            Id = usuario.Id,
-            NombreCompleto = usuario.NombreCompleto,
-            Email = usuario.Email,
-            Rol = usuario.Rol.Name
+            Expiracion = expiration,
+            ID = user.ID,
+            name = user.name,
+            email = user.email,
+            role = user.role.name
         };
     }
 
-    private static bool PasswordEsCorrecta(string passwordIngresada, string passwordHasheada)
+    private static bool VerifyPassword(string inputPassword, string hashedPassword)
     {
         try
         {
-            return BCrypt.Net.BCrypt.Verify(passwordIngresada, passwordHasheada);
+            return BCrypt.Net.BCrypt.Verify(inputPassword, hashedPassword);
         }
         catch (BCrypt.Net.SaltParseException)
         {

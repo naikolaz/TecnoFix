@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../config/api';
-import { obtenerMensajeError } from '../utils/errores';
+import { getErrorMessage } from '../utils/errores';
+import { showConfirmationDialog, showSuccessDialog, showErrorDialog } from '../utils/dialogo';
 
-interface FormularioRegistro {
+interface ClientRegistrationForm {
   nombreCompleto: string;
   email: string;
   rut: string;
@@ -11,17 +12,17 @@ interface FormularioRegistro {
 }
 
 export default function RegistroCliente() {
-  const [formData, setFormData] = useState<FormularioRegistro>({
+  const [formData, setFormData] = useState<ClientRegistrationForm>({
     nombreCompleto: '',
     email: '',
     rut: '',
     telefono: ''
   });
 
-  const [fieldErrors, setFieldErrors] = useState<Partial<FormularioRegistro>>({});
+  const [fieldErrors, setFieldErrors] = useState<Partial<ClientRegistrationForm>>({});
   const [error, setError] = useState<string | null>(null);
-  const [mensajeExito, setMensajeExito] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -29,9 +30,8 @@ export default function RegistroCliente() {
     setFieldErrors(prev => ({ ...prev, [name]: '' }));
   };
 
-  // ── CORRECCIÓN 1: validate() ahora cierra correctamente y retorna boolean ──
-  const validate = (): boolean => {
-    const errors: Partial<FormularioRegistro> = {};
+  const validateForm = (): boolean => {
+    const errors: Partial<ClientRegistrationForm> = {};
 
     if (!formData.nombreCompleto.trim()) {
       errors.nombreCompleto = 'Debe completar el campo Nombre y apellidos';
@@ -43,39 +43,58 @@ export default function RegistroCliente() {
       errors.email = 'El correo electrónico no tiene un formato válido';
     }
 
+    const cleanRut = formData.rut.replace(/[^0-9kK]/g, '').toUpperCase();
+
     if (!formData.rut.trim()) {
       errors.rut = 'Debe completar el campo RUT';
-    } else if (formData.rut.includes('.') || formData.rut.includes('-')) {
-      errors.rut = 'El RUT debe ingresarse sin puntos ni guion (ej.: 12345670K)';
+    } else if (cleanRut.length < 8 || cleanRut.length > 9) {
+      errors.rut = 'El RUT ingresado no es válido (ej: 12345678K o 12345678-k)';
     }
 
     if (!formData.telefono.trim()) {
       errors.telefono = 'Debe completar el campo Teléfono de contacto';
-    } else if (!/^\+?\d{10,11}$/.test(formData.telefono)) {
-      errors.telefono = 'El teléfono debe tener 11 caracteres máximo (ej: +56912345678)';
+    } else if (!/^\+?\d{9,12}$/.test(formData.telefono.replace(/\s/g, ''))) {
+      errors.telefono = 'El teléfono debe tener un formato válido (ej: +56912345678)';
     }
 
-    // CORRECCIÓN 1a: registrar errores en el estado y retornar resultado
     setFieldErrors(errors);
     return Object.keys(errors).length === 0;
-  }; // ← cierre correcto de validate()
+  };
 
-  // ── CORRECCIÓN 2: handleSubmit ahora está fuera de validate() ──
   const handleSubmit = async () => {
     setError(null);
-    setMensajeExito(false);
-    if (!validate()) return;
-    if (!window.confirm('¿Está seguro de registrar este cliente?')) return;
+    setSuccessMessage(false);
 
-    setLoading(true);
+    if (!validateForm()) return;
+
+    const isConfirmed = await showConfirmationDialog({
+      title: 'Confirmación de Registro (NF01)',
+      message: '¿Está seguro de registrar este nuevo cliente en el sistema TecnoFix?',
+      confirmButtonText: 'Sí, registrar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (!isConfirmed) return;
+
+    setIsLoading(true);
     try {
-      await api.post('/auth/registrar-cliente', formData);
-      setMensajeExito(true);
+      const formattedRut = formData.rut.replace(/[^0-9kK]/g, '').toUpperCase();
+
+      await api.post('/auth/registrar-cliente', {
+        ...formData,
+        rut: formattedRut
+      });
+
+      setSuccessMessage(true);
+      showSuccessDialog('¡Registro Exitoso!', 'El cliente ha sido registrado. La contraseña temporal fue enviada a su correo.');
+      
       setFormData({ nombreCompleto: '', email: '', rut: '', telefono: '' });
     } catch (e: any) {
-      setError(obtenerMensajeError(e));
+      const message = getErrorMessage(e);
+      setError(message);
+      showErrorDialog('Error al registrar', message);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -117,21 +136,18 @@ export default function RegistroCliente() {
           <h2 style={styles.cardTitle}>Registro de cliente</h2>
           <p style={styles.cardSub}>Completa los datos para crear tu cuenta.</p>
 
-          {/* Alerta error global */}
           {error && (
             <div style={{ ...styles.alert, ...styles.alertError }}>
               <span style={{ color: '#f56558', fontWeight: 600 }}>{error}</span>
             </div>
           )}
 
-          {/* Alerta éxito */}
-          {mensajeExito && (
+          {successMessage && (
             <div style={{ ...styles.alert, ...styles.alertSuccess }}>
               <span>Cliente registrado. La contraseña fue enviada al correo electrónico.</span>
             </div>
           )}
 
-          {/* Campo nombre */}
           <Field
             label="Nombre completo"
             id="nombreCompleto"
@@ -144,7 +160,6 @@ export default function RegistroCliente() {
             tooltip="Ingresa nombres y apellidos completos"
           />
 
-          {/* Campo email */}
           <Field
             label="Correo electrónico"
             id="email"
@@ -157,21 +172,19 @@ export default function RegistroCliente() {
             tooltip="Debe contener @ y dominio válido"
           />
 
-          {/* Campo RUT */}
           <Field
             label="RUT"
             id="rut"
             name="rut"
             type="text"
-            placeholder="12345670K"
+            placeholder="12345678K o 12345678-k"
             value={formData.rut}
             onChange={handleChange}
             error={fieldErrors.rut}
-            tooltip="Sin puntos ni guion (ej.: 12345670K)"
-            maxLength={9}
+            tooltip="Acepta dígito K en minúscula o mayúscula"
+            maxLength={10}
           />
 
-          {/* Campo teléfono */}
           <Field
             label="Teléfono"
             id="telefono"
@@ -181,16 +194,16 @@ export default function RegistroCliente() {
             value={formData.telefono}
             onChange={handleChange}
             error={fieldErrors.telefono}
-            tooltip="Numero mas prefijo (ej: +56912345678)"
-           maxLength={12}
+            tooltip="Número con prefijo (ej: +56912345678)"
+            maxLength={13}
           />
 
           <button
             onClick={handleSubmit}
-            disabled={loading}
-            style={{ ...styles.btnPrimary, opacity: loading ? 0.75 : 1 }}
+            disabled={isLoading}
+            style={{ ...styles.btnPrimary, opacity: isLoading ? 0.75 : 1 }}
           >
-            {loading ? 'Registrando...' : 'Registrar cliente'}
+            {isLoading ? 'Registrando...' : 'Registrar cliente'}
           </button>
 
           <p style={styles.cardFooter}>
@@ -202,8 +215,6 @@ export default function RegistroCliente() {
     </div>
   );
 }
-
-// ── Subcomponente Field ──────────────────────────────────────────────────────
 
 interface FieldProps {
   label: string;
@@ -247,8 +258,6 @@ function Field({ label, id, name, type, placeholder, value, onChange, error, too
     </div>
   );
 }
-
-// ── Estilos ──────────────────────────────────────────────────────────────────
 
 const styles: Record<string, React.CSSProperties> = {
   page: {
