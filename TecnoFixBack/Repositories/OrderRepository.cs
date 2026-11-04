@@ -65,54 +65,10 @@ public class OrderRepository : IOrderRepository
             .ToListAsync();
     }
 
-
     public async Task<Order?> GetByIdAsync(int id)
     {
         return await _context.Orders
             .Include(o => o.client)
             .FirstOrDefaultAsync(o => o.id == id);
     }
-
-    private async Task<string> ProcessAndNormalizeBrandAndModelAsync(string rawBrand, string rawModel)
-{
-    if (string.IsNullOrWhiteSpace(rawBrand)) return string.Empty;
-
-    string cleanBrandName = rawBrand.Trim();
-    string cleanModelName = rawModel?.Trim() ?? string.Empty;
-
-    // 1. Buscar o registrar la Marca (Case-insensitive)
-    var brand = await _context.Brands
-        .FirstOrDefaultAsync(b => b.Name.ToLower() == cleanBrandName.ToLower());
-
-    if (brand == null)
-    {
-        string formattedBrand = System.Globalization.CultureInfo.CurrentCulture.TextInfo
-            .ToTitleCase(cleanBrandName.ToLower());
-
-        brand = new Brand { Name = formattedBrand };
-        _context.Brands.Add(brand);
-        await _context.SaveChangesAsync();
-    }
-
-    // 2. Si se especificó un modelo, buscarlo o registrarlo asociado a esa marca
-    if (!string.IsNullOrWhiteSpace(cleanModelName))
-    {
-        var model = await _context.Models
-            .FirstOrDefaultAsync(m => m.BrandId == brand.Id && m.Name.ToLower() == cleanModelName.ToLower());
-
-        if (model == null)
-        {
-            _context.Models.Add(new DeviceModel
-            {
-                Name = cleanModelName,
-                BrandId = brand.Id
-            });
-            await _context.SaveChangesAsync();
-        }
-    }
-
-    return string.IsNullOrWhiteSpace(cleanModelName) 
-        ? brand.Name 
-        : $"{brand.Name} {cleanModelName}";
-}
 }

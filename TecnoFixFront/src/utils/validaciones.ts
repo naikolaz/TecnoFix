@@ -1,5 +1,9 @@
-const FORMATO_EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
+const EMAIL_REGEX = /^[^@\s]+@[^@\s]+\.[^@\s]+$/
 
-export const esEmailValido = (email: string): boolean => FORMATO_EMAIL.test(email.trim())
+export const isValidEmail = (email: string): boolean => EMAIL_REGEX.test(email.trim())
 
-export const estaVacio = (valor: string): boolean => valor.trim().length === 0
+export const isEmpty = (value: string): boolean => value.trim().length === 0
+
+// Aliases
+export const esEmailValido = isValidEmail
+export const estaVacio = isEmpty

@@ -1,16 +1,18 @@
-interface MensajeErrorProps {
+export interface ErrorMessageProps {
+  message?: string
   mensaje?: string
   id?: string
 }
 
-function MensajeError({ mensaje, id }: MensajeErrorProps) {
-  if (!mensaje) return null
+function ErrorMessage({ message, mensaje, id }: ErrorMessageProps) {
+  const displayMessage = message ?? mensaje
+  if (!displayMessage) return null
 
   return (
     <p className="mensaje-error" id={id} role="alert">
-      {mensaje}
+      {displayMessage}
     </p>
   )
 }
 
-export default MensajeError
+export default ErrorMessage

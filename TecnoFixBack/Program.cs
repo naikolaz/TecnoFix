@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using TecnoFixBack.Data;
 using TecnoFixBack.Interfaces;
-using TecnoFixBack.Models;
 using TecnoFixBack.Repositories;
 using TecnoFixBack.Services;
 
@@ -22,8 +21,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<ILoginService, LoginService>();
 builder.Services.AddScoped<IEmailService, SendGridEmailService>();
-builder.Services.AddScoped<IOrderService, OrderService>(); // Corrección aquí
-
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 var jwtKey = builder.Configuration["Jwt:Key"] 
     ?? throw new InvalidOperationException("Falta configurar Jwt:Key en appsettings.");
@@ -47,7 +45,6 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
-// Corrección del cierre en CORS
 builder.Services.AddCors(options =>
     options.AddPolicy("Frontend", policy =>
         policy.AllowAnyOrigin()
@@ -60,8 +57,16 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var contexto = scope.ServiceProvider.GetRequiredService<TecnoFixContext>();
-    contexto.Database.Migrate();
+    try
+    {
+        var contexto = scope.ServiceProvider.GetRequiredService<TecnoFixContext>();
+        contexto.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Ocurrió un error al aplicar las migraciones automáticas a la base de datos.");
+    }
 }
 
 if (app.Environment.IsDevelopment())

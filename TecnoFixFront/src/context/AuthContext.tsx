@@ -1,86 +1,103 @@
 import { useCallback, useMemo, useState, type ReactNode } from 'react'
-import { CLAVE_SESION } from '../config/constantes'
-import type { LoginResponse, SesionGuardada, Rol } from '../interfaces/auth'
+import { SESSION_STORAGE_KEY } from '../config/constantes'
+import type { LoginResponse, SavedSession, Role } from '../interfaces/auth'
 import { AuthContext } from './authContextBase'
 
-const normalizarRol = (rolCrudo: any): Rol => {
-  // 1. Imprimimos en la consola exactamente lo que llega
-  console.log('🚨 ROL DETECTADO DESDE EL BACKEND:', rolCrudo)
+const normalizeRole = (rawRole: unknown): Role => {
+  const value = String(rawRole ?? '').toLowerCase().trim()
 
-  const valor = String(rolCrudo).toLowerCase()
-  
-  // Posibles combinaciones de ID numérico (Ajusta estos números si en consola ves otros)
-  if (valor === '1') return 'Administrador'
-  if (valor === '2') return 'Técnico'
-  if (valor === '3') return 'Cliente'
-  
-  // Posibles cadenas de texto (por si el backend ya lo manda como texto)
-  if (valor.includes('admin')) return 'Administrador'
-  if (valor.includes('tec') || valor.includes('téc')) return 'Técnico'
-  if (valor.includes('cli')) return 'Cliente'
-  
+  // DB Role ID mapping: 1 = Administrador, 2 = Cliente, 3 = Técnico
+  if (value === '1') return 'Administrador'
+  if (value === '2') return 'Cliente'
+  if (value === '3') return 'Técnico'
+
+  // Text matches
+  if (value.includes('admin')) return 'Administrador'
+  if (value.includes('tec') || value.includes('téc')) return 'Técnico'
+  if (value.includes('cli')) return 'Cliente'
+
   return 'Cliente'
 }
 
-const leerSesionGuardada = (): SesionGuardada | null => {
+const readSavedSession = (): SavedSession | null => {
   try {
-    const texto = localStorage.getItem(CLAVE_SESION)
-    if (!texto) return null
+    const rawData = localStorage.getItem(SESSION_STORAGE_KEY)
+    if (!rawData) return null
 
-    const sesion = JSON.parse(texto) as SesionGuardada
-    if (new Date(sesion.expiracion).getTime() <= Date.now()) {
-      localStorage.removeItem(CLAVE_SESION)
+    const session = JSON.parse(rawData) as SavedSession
+    const expirationDate = session.expiration || session.expiracion
+    if (new Date(expirationDate).getTime() <= Date.now()) {
+      localStorage.removeItem(SESSION_STORAGE_KEY)
       return null
     }
 
-    if (sesion.usuario) {
-      sesion.usuario.rol = normalizarRol(sesion.usuario.rol)
+    const currentUser = session.user || session.usuario
+    if (currentUser) {
+      const normalized = normalizeRole(currentUser.role || currentUser.rol)
+      currentUser.role = normalized
+      currentUser.rol = normalized
+      currentUser.fullName = currentUser.fullName || currentUser.nombreCompleto
+      currentUser.nombreCompleto = currentUser.fullName
     }
 
-    return sesion
+    return session
   } catch {
     return null
   }
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [sesion, setSesion] = useState<SesionGuardada | null>(leerSesionGuardada)
+  const [session, setSession] = useState<SavedSession | null>(readSavedSession)
 
-  const guardarSesion = useCallback((respuesta: any) => {
-    // 2. Buscamos el rol en todas sus posibles escrituras desde C#
-    const rolCapturado = respuesta.rol ?? respuesta.Rol ?? respuesta.role ?? respuesta.idRol ?? respuesta.roleId;
+  const saveSession = useCallback((response: LoginResponse) => {
+    const capturedRole = response.rol ?? response.role ?? response.idRole
+    const capturedName = response.nombreCompleto ?? response.name ?? ''
+    const role = normalizeRole(capturedRole)
 
-    console.log('📦 RESPUESTA COMPLETA DEL LOGIN:', respuesta);
-
-    const nuevaSesion: SesionGuardada = {
-      token: respuesta.token,
-      expiracion: respuesta.expiracion,
-      usuario: {
-        id: respuesta.id,
-        nombreCompleto: respuesta.nombreCompleto,
-        email: respuesta.email,
-        rol: normalizarRol(rolCapturado), // Enviamos lo capturado
-      },
+    const userSession = {
+      id: response.id,
+      fullName: capturedName,
+      nombreCompleto: capturedName,
+      email: response.email,
+      role,
+      rol: role,
     }
-    localStorage.setItem(CLAVE_SESION, JSON.stringify(nuevaSesion))
-    setSesion(nuevaSesion)
+
+    const expirationString = response.expiracion
+
+    const newSession: SavedSession = {
+      token: response.token,
+      expiration: expirationString,
+      expiracion: expirationString,
+      user: userSession,
+      usuario: userSession,
+    }
+
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(newSession))
+    setSession(newSession)
   }, [])
 
-  const cerrarSesion = useCallback(() => {
-    localStorage.removeItem(CLAVE_SESION)
-    setSesion(null)
+  const logout = useCallback(() => {
+    localStorage.removeItem(SESSION_STORAGE_KEY)
+    setSession(null)
   }, [])
 
-  const valor = useMemo(
-    () => ({
-      usuario: sesion?.usuario ?? null,
-      token: sesion?.token ?? null,
-      estaAutenticado: sesion !== null,
-      guardarSesion,
-      cerrarSesion,
-    }),
-    [sesion, guardarSesion, cerrarSesion],
-  )
+  const contextValue = useMemo(() => {
+    const activeUser = session?.user ?? session?.usuario ?? null
+    const isAuthenticated = session !== null
 
-  return <AuthContext.Provider value={valor}>{children}</AuthContext.Provider>
+    return {
+      user: activeUser,
+      usuario: activeUser,
+      token: session?.token ?? null,
+      isAuthenticated,
+      estaAutenticado: isAuthenticated,
+      saveSession,
+      guardarSesion: saveSession,
+      logout,
+      cerrarSesion: logout,
+    }
+  }, [session, saveSession, logout])
+
+  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
 }

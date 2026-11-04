@@ -1,34 +1,36 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/useAuth'
-import type { Rol } from '../interfaces/auth'
+import type { Role } from '../interfaces/auth'
 
-interface RutaProtegidaProps {
-  rolesPermitidos?: Rol[]
+interface ProtectedRouteProps {
+  allowedRoles?: Role[]
+  rolesPermitidos?: Role[]
 }
 
-// Función auxiliar para normalizar cadenas (quita tildes y pasa a minúsculas)
-const normalizarTexto = (texto: string = '') =>
-  texto
+const normalizeText = (text: string = '') =>
+  text
     .toLowerCase()
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
 
-function RutaProtegida({ rolesPermitidos }: RutaProtegidaProps) {
-  const { estaAutenticado, usuario } = useAuth()
-  const ubicacion = useLocation()
+function ProtectedRoute({ allowedRoles, rolesPermitidos }: ProtectedRouteProps) {
+  const { isAuthenticated, user } = useAuth()
+  const location = useLocation()
 
-  if (!estaAutenticado || !usuario) {
-    return <Navigate to="/login" replace state={{ desde: ubicacion.pathname }} />
+  if (!isAuthenticated || !user) {
+    return <Navigate to="/login" replace state={{ desde: location.pathname }} />
   }
 
-  if (rolesPermitidos && rolesPermitidos.length > 0) {
-    const rolUsuarioNormalizado = normalizarTexto(usuario.rol)
+  const effectiveRoles = allowedRoles ?? rolesPermitidos
 
-    const tienePermiso = rolesPermitidos.some(
-      (rol) => normalizarTexto(rol) === rolUsuarioNormalizado
+  if (effectiveRoles && effectiveRoles.length > 0) {
+    const userRoleNormalized = normalizeText(user.role)
+
+    const hasPermission = effectiveRoles.some(
+      (role) => normalizeText(role) === userRoleNormalized
     )
 
-    if (!tienePermiso) {
+    if (!hasPermission) {
       return <Navigate to="/inicio" replace />
     }
   }
@@ -36,4 +38,4 @@ function RutaProtegida({ rolesPermitidos }: RutaProtegidaProps) {
   return <Outlet />
 }
 
-export default RutaProtegida
+export default ProtectedRoute

@@ -8,4 +8,8 @@ public class LoginResponseDto
     public string name { get; set; } = string.Empty;
     public string email { get; set; } = string.Empty;
     public string role { get; set; } = string.Empty;
+
+    // Propiedades adicionales para compatibilidad con frontend
+    public string nombreCompleto => name;
+    public string rol => role;
 }

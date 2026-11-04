@@ -14,26 +14,23 @@ public class SendGridEmailService : IEmailService
         _config = config;
     }
 
-    public async Task EnviarCorreoAsync(string destinatario, string asunto, string mensaje)
+    public async Task SendEmailAsync(string recipient, string subject, string htmlMessage)
     {
         var apiKey = _config["SendGrid:ApiKey"];
         var client = new SendGridClient(apiKey);
         
         var from = new EmailAddress(_config["SendGrid:FromEmail"], _config["SendGrid:FromName"]);
-        var to = new EmailAddress(destinatario);
+        var to = new EmailAddress(recipient);
 
-        // Versión plana simplificada como respaldo (fallback)
-        string plainTextContent = Regex.Replace(mensaje, "<.*?>", string.Empty);
+        string plainTextContent = Regex.Replace(htmlMessage, "<.*?>", string.Empty);
         
-        // Creamos el correo pasando tanto texto plano como HTML
-        var msg = MailHelper.CreateSingleEmail(from, to, asunto, plainTextContent, mensaje);
+        var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlMessage);
         
-        // ⚠️ UNA SOLA LLAMADA a SendEmailAsync
-        var respuesta = await client.SendEmailAsync(msg);
+        var response = await client.SendEmailAsync(msg);
 
-        if (!respuesta.IsSuccessStatusCode)
+        if (!response.IsSuccessStatusCode)
         {
-            throw new Exception($"SendGrid respondió con estado HTTP {(int)respuesta.StatusCode}");
+            throw new Exception($"SendGrid responded with HTTP status {(int)response.StatusCode}");
         }
     }
 }

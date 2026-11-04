@@ -14,51 +14,43 @@ public class UserRepository : IUserRepository
         _context = context;
     }
 
-    public async Task<bool> ExisteEmailAsync(string email)
+    public async Task<bool> EmailExistsAsync(string email)
     {
-        var emailNormalizado = email.Trim().ToLower();
-        return await _context.Users.AnyAsync(u => u.email.ToLower() == emailNormalizado);
+        var normalizedEmail = email.Trim().ToLower();
+        return await _context.Users.AnyAsync(u => u.email.ToLower() == normalizedEmail);
     }
 
-    public async Task<bool> ExisteRutAsync(string RUT)
+    public async Task<bool> RutExistsAsync(string rut)
     {
-        return await _context.Users.AnyAsync(u => u.RUT == RUT);
+        return await _context.Users.AnyAsync(u => u.RUT == rut);
     }
 
-    public async Task CrearUsuarioAsync(User user)
+    public async Task CreateUserAsync(User user)
     {
         await _context.Users.AddAsync(user);
         await _context.SaveChangesAsync();
     }
 
-    public async Task<User?> ObtenerPorEmailAsync(string email)
+    public async Task<User?> GetByEmailAsync(string email)
     {
-        var emailNormalizado = email.Trim().ToLower();
+        var normalizedEmail = email.Trim().ToLower();
 
         return await _context.Users
             .AsNoTracking()
             .Include(u => u.role)
-            .FirstOrDefaultAsync(u => u.email.ToLower() == emailNormalizado);
+            .FirstOrDefaultAsync(u => u.email.ToLower() == normalizedEmail);
     }
 
-  public async Task<User?> ObtenerPorIdAsync(int id)
-{
-    return await _context.Users.FindAsync(id);
-}
+    public async Task<User?> GetByIdAsync(int id)
+    {
+        return await _context.Users.FindAsync(id);
+    }
 
-public async Task<IEnumerable<User>> ObtenerClientesAsync()
-{
-    return await _context.Users
-        .Where(u => u.idRole == 2) // Solo clientes
-        .OrderBy(u => u.name)
-        .ToListAsync();
-}
-
-public async Task<IEnumerable<User>> ObtenerClientesAsync(CancellationToken cancellationToken = default)
-{
-    return await _context.Users
-        .Where(u => u.idRole == 2)
-        .OrderBy(u => u.name)
-        .ToListAsync(cancellationToken);
-}
+    public async Task<IEnumerable<User>> GetClientsAsync(CancellationToken cancellationToken = default)
+    {
+        return await _context.Users
+            .Where(u => u.idRole == 2) // Role 2: Client
+            .OrderBy(u => u.name)
+            .ToListAsync(cancellationToken);
+    }
 }

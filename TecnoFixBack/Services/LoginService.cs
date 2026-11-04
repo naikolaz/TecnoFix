@@ -15,23 +15,22 @@ public class LoginService : ILoginService
     }
 
     /// <summary>
-    /// USU-001: valida el correo y la contraseña contra la base de datos.
-    /// Retorna null si el correo no existe o la contraseña no coincide con el hash almacenado,
-    /// sin distinguir cuál de los dos falló para no revelar qué correos están registrados.
+    /// USU-001: Validates email and password against the database.
+    /// Returns null if user does not exist or password does not match.
     /// </summary>
-    public async Task<LoginResponseDto?> IniciarSesionAsync(LoginDto dto)
+    public async Task<LoginResponseDto?> LoginAsync(LoginDto dto)
     {
-        var user = await _userRepository.ObtenerPorEmailAsync(dto.Email);
+        var user = await _userRepository.GetByEmailAsync(dto.Email);
 
-        if (user is null || !PasswordEsCorrecta(dto.Password, user.password))
+        if (user is null || !VerifyPassword(dto.Password, user.password))
             return null;
 
-        var (token, expiracion) = _tokenService.GenerarToken(user);
+        var (token, expiration) = _tokenService.GenerateToken(user);
 
         return new LoginResponseDto
         {
             Token = token,
-            Expiracion = expiracion,
+            Expiracion = expiration,
             ID = user.ID,
             name = user.name,
             email = user.email,
@@ -39,11 +38,11 @@ public class LoginService : ILoginService
         };
     }
 
-    private static bool PasswordEsCorrecta(string passwordIngresada, string passwordHasheada)
+    private static bool VerifyPassword(string inputPassword, string hashedPassword)
     {
         try
         {
-            return BCrypt.Net.BCrypt.Verify(passwordIngresada, passwordHasheada);
+            return BCrypt.Net.BCrypt.Verify(inputPassword, hashedPassword);
         }
         catch (BCrypt.Net.SaltParseException)
         {

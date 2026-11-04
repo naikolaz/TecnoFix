@@ -1,7 +1,6 @@
-import React from 'react';
-import RegistroOrdenForm from '../components/RegistroOrdenForm.tsx';
+import RegistroOrdenForm from '../components/RegistroOrdenForm';
 
-export const RegistrarOrdenPage: React.FC = () => {
+export const RegistrarOrdenPage = () => {
   return (
     <div className="p-6">
       <RegistroOrdenForm />

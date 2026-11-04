@@ -3,60 +3,60 @@ import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import CampoFormulario from '../components/CampoFormulario'
 import Logo from '../components/Logo'
 import MensajeError from '../components/MensajeError'
-import { MENSAJES_LOGIN } from '../config/constantes'
+import { LOGIN_MESSAGES } from '../config/constantes'
 import { useAuth } from '../context/useAuth'
-import { iniciarSesion } from '../services/authService'
-import { obtenerMensajeError } from '../utils/errores'
-import { esEmailValido, estaVacio } from '../utils/validaciones'
+import { login } from '../services/authService'
+import { getErrorMessage } from '../utils/errores'
+import { isValidEmail, isEmpty } from '../utils/validaciones'
 import './LoginPage.css'
 
-interface ErroresLogin {
+interface LoginFormErrors {
   email?: string
   password?: string
   general?: string
 }
 
-const validarFormulario = (email: string, password: string): ErroresLogin => {
-  const errores: ErroresLogin = {}
+const validateLoginForm = (email: string, password: string): LoginFormErrors => {
+  const errors: LoginFormErrors = {}
 
-  if (estaVacio(email)) errores.email = MENSAJES_LOGIN.emailVacio
-  else if (!esEmailValido(email)) errores.email = MENSAJES_LOGIN.emailInvalido
+  if (isEmpty(email)) errors.email = LOGIN_MESSAGES.emptyEmail
+  else if (!isValidEmail(email)) errors.email = LOGIN_MESSAGES.invalidEmail
 
-  if (estaVacio(password)) errores.password = MENSAJES_LOGIN.passwordVacia
+  if (isEmpty(password)) errors.password = LOGIN_MESSAGES.emptyPassword
 
-  return errores
+  return errors
 }
 
 function LoginPage() {
-  const { estaAutenticado, guardarSesion } = useAuth()
-  const navegar = useNavigate()
-  const ubicacion = useLocation()
-  const destino = (ubicacion.state as { desde?: string } | null)?.desde ?? '/inicio'
+  const { isAuthenticated, saveSession } = useAuth()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const destination = (location.state as { desde?: string } | null)?.desde ?? '/inicio'
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [mostrarPassword, setMostrarPassword] = useState(false)
-  const [errores, setErrores] = useState<ErroresLogin>({})
-  const [cargando, setCargando] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [errors, setErrors] = useState<LoginFormErrors>({})
+  const [isLoading, setIsLoading] = useState(false)
 
-  if (estaAutenticado) return <Navigate to={destino} replace />
+  if (isAuthenticated) return <Navigate to={destination} replace />
 
-  const manejarEnvio = async (evento: FormEvent<HTMLFormElement>) => {
-    evento.preventDefault()
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
 
-    const erroresValidacion = validarFormulario(email, password)
-    setErrores(erroresValidacion)
-    if (Object.keys(erroresValidacion).length > 0) return
+    const validationErrors = validateLoginForm(email, password)
+    setErrors(validationErrors)
+    if (Object.keys(validationErrors).length > 0) return
 
-    setCargando(true)
+    setIsLoading(true)
     try {
-      const respuesta = await iniciarSesion({ email, password })
-      guardarSesion(respuesta)
-      navegar(destino, { replace: true })
+      const response = await login({ email, password })
+      saveSession(response)
+      navigate(destination, { replace: true })
     } catch (error) {
-      setErrores({ general: obtenerMensajeError(error) })
+      setErrors({ general: getErrorMessage(error) })
     } finally {
-      setCargando(false)
+      setIsLoading(false)
     }
   }
 
@@ -69,7 +69,7 @@ function LoginPage() {
       </section>
 
       <section className="login__panel">
-        <form className="login__tarjeta" onSubmit={manejarEnvio} noValidate>
+        <form className="login__tarjeta" onSubmit={handleSubmit} noValidate>
           <h2>Iniciar sesión</h2>
           <p className="login__subtitulo">Ingresa con tu correo electrónico y contraseña.</p>
 
@@ -81,36 +81,36 @@ function LoginPage() {
             placeholder="usuario@correo.cl"
             ayuda="Usa el correo con el que te registraste en TecnoFix, por ejemplo usuario@correo.cl."
             value={email}
-            error={errores.email}
+            error={errors.email}
             onChange={(e) => setEmail(e.target.value)}
           />
 
           <CampoFormulario
             id="password"
             etiqueta="Contraseña"
-            type={mostrarPassword ? 'text' : 'password'}
+            type={showPassword ? 'text' : 'password'}
             autoComplete="current-password"
             placeholder="••••••••"
             ayuda="Si eres nuevo, usa la contraseña temporal que te llegó por correo al registrarte."
             value={password}
-            error={errores.password}
+            error={errors.password}
             onChange={(e) => setPassword(e.target.value)}
             accion={
               <button
                 type="button"
                 className="campo__boton-ver"
-                onClick={() => setMostrarPassword((valor) => !valor)}
-                title={mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                onClick={() => setShowPassword((prev) => !prev)}
+                title={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
               >
-                {mostrarPassword ? 'Ocultar' : 'Ver'}
+                {showPassword ? 'Ocultar' : 'Ver'}
               </button>
             }
           />
 
-          <MensajeError mensaje={errores.general} />
+          <MensajeError mensaje={errors.general} />
 
-          <button type="submit" className="boton boton--primario boton--bloque" disabled={cargando}>
-            {cargando ? 'Ingresando…' : 'Ingresar'}
+          <button type="submit" className="boton boton--primario boton--bloque" disabled={isLoading}>
+            {isLoading ? 'Ingresando…' : 'Ingresar'}
           </button>
 
           <p className="login__registro">

@@ -15,51 +15,52 @@ public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
     private readonly ILoginService _loginService;
-    private readonly IUserRepository _userRepository; // Se usa la interfaz
+    private readonly IUserRepository _userRepository;
 
     public AuthController(IAuthService authService, ILoginService loginService, IUserRepository userRepository)
     {
         _authService = authService;
         _loginService = loginService;
-        _userRepository = userRepository; // Se inyecta la interfaz
+        _userRepository = userRepository;
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto dto)
     {
-        var respuesta = await _loginService.IniciarSesionAsync(dto);
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
 
-        if (respuesta is null)
+        var response = await _loginService.LoginAsync(dto);
+
+        if (response is null)
             return Unauthorized(new { error = "Correo electrónico o contraseña incorrectos" });
 
-        return Ok(respuesta);
+        return Ok(response);
     }
 
     [Authorize]
     [HttpGet("sesion")]
-    public IActionResult ObtenerSesion()
+    public IActionResult GetSession()
     {
         return Ok(new
         {
             id = User.FindFirstValue(ClaimTypes.NameIdentifier),
-            nombreCompleto = User.FindFirstValue("nombreCompleto"),
+            nombreCompleto = User.FindFirstValue("nombreCompleto") ?? User.FindFirstValue(ClaimTypes.Name) ?? string.Empty,
             email = User.FindFirstValue(ClaimTypes.Email),
             rol = User.FindFirstValue(ClaimTypes.Role)
         });
     }
 
     [HttpPost("registrar-cliente")]
-    public async Task<IActionResult> RegistrarCliente([FromBody] RegistroClienteDto dto)
+    public async Task<IActionResult> RegisterClient([FromBody] RegistroClienteDto dto)
     {
         if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState); 
-        }
+            return BadRequest(ModelState);
 
         try
         {
-            var resultado = await _authService.RegisterClientAsync(dto);
-            return Ok(new { message = resultado });
+            var result = await _authService.RegisterClientAsync(dto);
+            return Ok(new { message = result });
         }
         catch (Exception ex)
         {
@@ -69,17 +70,15 @@ public class AuthController : ControllerBase
     
     [Authorize(Roles = "Administrador")]
     [HttpPost("registrar-tecnico")]
-    public async Task<IActionResult> RegistrarTecnico([FromBody] RegistroTecnicoDto dto)
+    public async Task<IActionResult> RegisterTechnician([FromBody] RegistroTecnicoDto dto)
     {
         if (!ModelState.IsValid)
-        {
             return BadRequest(ModelState);
-        }
 
         try
         {
-            var resultado = await _authService.RegisterTechnicianAsync(dto);
-            return Ok(new { mensaje = resultado });
+            var result = await _authService.RegisterTechnicianAsync(dto);
+            return Ok(new { mensaje = result, message = result });
         }
         catch (Exception ex)
         {
@@ -89,22 +88,23 @@ public class AuthController : ControllerBase
 
     [HttpGet("clientes")]
     [Authorize]
-    public async Task<IActionResult> ObtenerClientes()
+    public async Task<IActionResult> GetClients(CancellationToken cancellationToken)
     {
         try
         {
-            var clientes = await _userRepository.ObtenerClientesAsync();
+            var clients = await _userRepository.GetClientsAsync(cancellationToken);
 
-            var resultado = clientes.Select(c => new
+            var result = clients.Select(c => new
             {
                 id = c.ID,
                 name = c.name,
+                nombreCompleto = c.name,
                 email = c.email,
                 rut = c.RUT,
                 telephoneNumber = c.telephoneNumber
             });
 
-            return Ok(resultado);
+            return Ok(result);
         }
         catch (Exception ex)
         {

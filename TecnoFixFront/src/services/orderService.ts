@@ -1,22 +1,28 @@
+import api from '../config/api';
 import type { CreateOrderDto, OrderResponseDto } from '../interfaces/Order';
 
-const API_URL = 'http://localhost:5199/api/Order';
-
-export const crearOrden = async (dto: CreateOrderDto): Promise<OrderResponseDto> => {
-  const token = localStorage.getItem('token');
-  const res = await fetch(API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(dto),
-  });
-
-  if (!res.ok) {
-    const errorData = await res.json();
-    throw new Error(errorData.message || 'Error al registrar la orden');
-  }
-
-  return res.json();
+export const createOrder = async (dto: CreateOrderDto): Promise<OrderResponseDto> => {
+  const { data } = await api.post<OrderResponseDto>('/Order', dto);
+  return data;
 };
+
+export const getAllOrders = async (): Promise<OrderResponseDto[]> => {
+  const { data } = await api.get<OrderResponseDto[]>('/Order');
+  return data;
+};
+
+export const getOrderById = async (id: number): Promise<OrderResponseDto> => {
+  const { data } = await api.get<OrderResponseDto>(`/Order/${id}`);
+  return data;
+};
+
+export const getOrdersByClientId = async (clientId: number): Promise<OrderResponseDto[]> => {
+  const { data } = await api.get<OrderResponseDto[]>(`/Order/cliente/${clientId}`);
+  return data;
+};
+
+// Aliases
+export const crearOrden = createOrder;
+export const obtenerOrdenes = getAllOrders;
+export const obtenerOrdenPorId = getOrderById;
+export const obtenerOrdenesPorCliente = getOrdersByClientId;

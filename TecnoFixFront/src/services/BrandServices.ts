@@ -1,21 +1,17 @@
-import type { Marca, ModeloDispositivo } from '../interfaces/Order';
+import api from '../config/api';
+import type { Brand, DeviceModel, Marca, ModeloDispositivo } from '../interfaces/Order';
 
-const API_URL = 'http://localhost:5199/api/Brand';
-
-export const obtenerMarcas = async (): Promise<Marca[]> => {
-  const token = localStorage.getItem('token');
-  const res = await fetch(API_URL, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!res.ok) throw new Error('Error al obtener marcas');
-  return res.json();
+export const getBrands = async (): Promise<Brand[]> => {
+  const { data } = await api.get<Brand[]>('/Brand');
+  return data;
 };
 
-export const obtenerModelosPorMarca = async (brandId: string): Promise<ModeloDispositivo[]> => {
-  const token = localStorage.getItem('token');
-  const res = await fetch(`${API_URL}/${brandId}/models`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!res.ok) throw new Error('Error al obtener modelos');
-  return res.json();
+export const getModelsByBrand = async (brandId: string | number): Promise<DeviceModel[]> => {
+  const { data } = await api.get<DeviceModel[]>(`/Brand/${brandId}/models`);
+  return data;
 };
+
+// Aliases
+export const obtenerMarcas = getBrands;
+export const obtenerModelosPorMarca = getModelsByBrand;
+export type { Marca, ModeloDispositivo };

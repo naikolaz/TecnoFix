@@ -1,26 +1,26 @@
 import { Outlet, Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
-import { MENU_POR_ROL } from '../config/menuPorRol';
+import { MENU_BY_ROLE } from '../config/menuPorRol';
 import Logo from './Logo';
 
 export default function Layout() {
-  const { usuario, cerrarSesion } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    cerrarSesion();
+    logout();
     navigate('/login');
   };
 
-  const rolUsuario = usuario?.rol || 'Cliente';
+  const userRole = user?.role || 'Cliente';
   
-  // Buscar las opciones asociadas al rol de forma flexible
-  const claveRol = (Object.keys(MENU_POR_ROL).find(
-    (key) => key.toLowerCase() === rolUsuario.toLowerCase()
-  ) || 'Cliente') as keyof typeof MENU_POR_ROL;
+  // Find menu options for user role
+  const roleKey = (Object.keys(MENU_BY_ROLE).find(
+    (key) => key.toLowerCase() === userRole.toLowerCase()
+  ) || 'Cliente') as keyof typeof MENU_BY_ROLE;
 
-  const menuOpciones = MENU_POR_ROL[claveRol] || [];
-  const opcionesVisibles = menuOpciones.filter((opcion) => opcion.disponible);
+  const menuOptions = MENU_BY_ROLE[roleKey] || [];
+  const visibleOptions = menuOptions.filter((option) => option.isAvailable);
 
   return (
     <div className="layout">
@@ -30,16 +30,16 @@ export default function Layout() {
         </Link>
 
         <nav className="barra__menu">
-          {opcionesVisibles.map((opcion, index) => (
-            <Link key={index} to={opcion.ruta}>
-              {opcion.titulo}
+          {visibleOptions.map((option, index) => (
+            <Link key={index} to={option.route}>
+              {option.title}
             </Link>
           ))}
         </nav>
 
         <div className="barra__usuario">
-          <span className="barra__nombre">{usuario?.email}</span>
-          <span className="insignia-rol">{rolUsuario}</span>
+          <span className="barra__nombre">{user?.fullName || user?.email}</span>
+          <span className="insignia-rol">{userRole}</span>
           <button type="button" onClick={handleLogout} className="boton boton--claro">
             Cerrar sesión
           </button>

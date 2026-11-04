@@ -9,9 +9,6 @@ public class Order
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-
-    [ForeignKey("ClientId")]
-    public User? Client { get; set; }
     public int id { get; set; }
 
     [Required(ErrorMessage = "Debe completar el campo Cliente")]
@@ -39,6 +36,5 @@ public class Order
     [Required]
     public DateTime createdAt { get; set; } = DateTime.UtcNow;
 
-    // Ahora usa OrderLog en lugar de Logger
     public List<OrderLog> history { get; set; } = new List<OrderLog>();
 }

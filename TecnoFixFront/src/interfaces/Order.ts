@@ -1,12 +1,14 @@
-export interface Marca {
+export interface Brand {
   id: number;
   name: string;
 }
+export type Marca = Brand;
 
-export interface ModeloDispositivo {
+export interface DeviceModel {
   id: number;
   name: string;
 }
+export type ModeloDispositivo = DeviceModel;
 
 export interface CreateOrderDto {
   clientId: number;

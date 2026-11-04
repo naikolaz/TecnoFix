@@ -20,23 +20,37 @@ public class BrandController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetBrands()
     {
-        var brands = await _context.Brands
-            .OrderBy(b => b.Name)
-            .Select(b => new { b.Id, b.Name })
-            .ToListAsync();
+        try
+        {
+            var brands = await _context.Brands
+                .OrderBy(b => b.Name)
+                .Select(b => new { b.Id, b.Name })
+                .ToListAsync();
 
-        return Ok(brands);
+            return Ok(brands);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error al obtener las marcas.", detail = ex.Message });
+        }
     }
 
     [HttpGet("{brandId:int}/models")]
     public async Task<IActionResult> GetModelsByBrand(int brandId)
     {
-        var models = await _context.Models
-            .Where(m => m.BrandId == brandId)
-            .OrderBy(m => m.Name)
-            .Select(m => new { m.Id, m.Name })
-            .ToListAsync();
+        try
+        {
+            var models = await _context.Models
+                .Where(m => m.BrandId == brandId)
+                .OrderBy(m => m.Name)
+                .Select(m => new { m.Id, m.Name })
+                .ToListAsync();
 
-        return Ok(models);
+            return Ok(models);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error al obtener los modelos de la marca.", detail = ex.Message });
+        }
     }
 }

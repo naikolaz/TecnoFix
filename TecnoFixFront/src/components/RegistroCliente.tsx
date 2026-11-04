@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../config/api';
-import { obtenerMensajeError } from '../utils/errores';
-import { mostrarConfirmacion, mostrarExito, mostrarError } from '../utils/dialogo';
+import { getErrorMessage } from '../utils/errores';
+import { showConfirmationDialog, showSuccessDialog, showErrorDialog } from '../utils/dialogo';
 
-interface FormularioRegistro {
+interface ClientRegistrationForm {
   nombreCompleto: string;
   email: string;
   rut: string;
@@ -12,17 +12,17 @@ interface FormularioRegistro {
 }
 
 export default function RegistroCliente() {
-  const [formData, setFormData] = useState<FormularioRegistro>({
+  const [formData, setFormData] = useState<ClientRegistrationForm>({
     nombreCompleto: '',
     email: '',
     rut: '',
     telefono: ''
   });
 
-  const [fieldErrors, setFieldErrors] = useState<Partial<FormularioRegistro>>({});
+  const [fieldErrors, setFieldErrors] = useState<Partial<ClientRegistrationForm>>({});
   const [error, setError] = useState<string | null>(null);
-  const [mensajeExito, setMensajeExito] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -30,9 +30,8 @@ export default function RegistroCliente() {
     setFieldErrors(prev => ({ ...prev, [name]: '' }));
   };
 
-  // ── VALIDACIÓN FORMULARIO ──────────────────────────────────────────────────
-  const validate = (): boolean => {
-    const errors: Partial<FormularioRegistro> = {};
+  const validateForm = (): boolean => {
+    const errors: Partial<ClientRegistrationForm> = {};
 
     if (!formData.nombreCompleto.trim()) {
       errors.nombreCompleto = 'Debe completar el campo Nombre y apellidos';
@@ -44,12 +43,11 @@ export default function RegistroCliente() {
       errors.email = 'El correo electrónico no tiene un formato válido';
     }
 
-    // Acepta K/k en minúscula y mayúscula, valida RUT sin o con guion/puntos
-    const rutLimpio = formData.rut.replace(/[^0-9kK]/g, '').toUpperCase();
+    const cleanRut = formData.rut.replace(/[^0-9kK]/g, '').toUpperCase();
 
     if (!formData.rut.trim()) {
       errors.rut = 'Debe completar el campo RUT';
-    } else if (rutLimpio.length < 8 || rutLimpio.length > 9) {
+    } else if (cleanRut.length < 8 || cleanRut.length > 9) {
       errors.rut = 'El RUT ingresado no es válido (ej: 12345678K o 12345678-k)';
     }
 
@@ -63,45 +61,40 @@ export default function RegistroCliente() {
     return Object.keys(errors).length === 0;
   };
 
-  // ── ENVÍO DE FORMULARIO CON CONFIRMACIÓN NF01 ──────────────────────────────
   const handleSubmit = async () => {
     setError(null);
-    setMensajeExito(false);
+    setSuccessMessage(false);
 
-    if (!validate()) return;
+    if (!validateForm()) return;
 
-    // 1. Mostrar diálogo de confirmación NF01 con SweetAlert2
-    const confirmado = await mostrarConfirmacion({
-      titulo: 'Confirmación de Registro (NF01)',
-      mensaje: '¿Está seguro de registrar este nuevo cliente en el sistema TecnoFix?',
-      textoBotonConfirmar: 'Sí, registrar',
-      textoBotonCancelar: 'Cancelar'
+    const isConfirmed = await showConfirmationDialog({
+      title: 'Confirmación de Registro (NF01)',
+      message: '¿Está seguro de registrar este nuevo cliente en el sistema TecnoFix?',
+      confirmButtonText: 'Sí, registrar',
+      cancelButtonText: 'Cancelar'
     });
 
-    if (!confirmado) return;
+    if (!isConfirmed) return;
 
-    // 2. Procesar registro en backend
-    setLoading(true);
+    setIsLoading(true);
     try {
-      // Formateamos RUT asegurando 'K' mayúscula limpia para enviar al servidor
-      const rutFormateado = formData.rut.replace(/[^0-9kK]/g, '').toUpperCase();
+      const formattedRut = formData.rut.replace(/[^0-9kK]/g, '').toUpperCase();
 
       await api.post('/auth/registrar-cliente', {
         ...formData,
-        rut: rutFormateado
+        rut: formattedRut
       });
 
-      setMensajeExito(true);
-      mostrarExito('¡Registro Exitoso!', 'El cliente ha sido registrado. La contraseña temporal fue enviada a su correo.');
+      setSuccessMessage(true);
+      showSuccessDialog('¡Registro Exitoso!', 'El cliente ha sido registrado. La contraseña temporal fue enviada a su correo.');
       
-      // Limpiar formulario
       setFormData({ nombreCompleto: '', email: '', rut: '', telefono: '' });
     } catch (e: any) {
-      const msgError = obtenerMensajeError(e);
-      setError(msgError);
-      mostrarError('Error al registrar', msgError);
+      const message = getErrorMessage(e);
+      setError(message);
+      showErrorDialog('Error al registrar', message);
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -143,21 +136,18 @@ export default function RegistroCliente() {
           <h2 style={styles.cardTitle}>Registro de cliente</h2>
           <p style={styles.cardSub}>Completa los datos para crear tu cuenta.</p>
 
-          {/* Alerta error global */}
           {error && (
             <div style={{ ...styles.alert, ...styles.alertError }}>
               <span style={{ color: '#f56558', fontWeight: 600 }}>{error}</span>
             </div>
           )}
 
-          {/* Alerta éxito */}
-          {mensajeExito && (
+          {successMessage && (
             <div style={{ ...styles.alert, ...styles.alertSuccess }}>
               <span>Cliente registrado. La contraseña fue enviada al correo electrónico.</span>
             </div>
           )}
 
-          {/* Campo nombre */}
           <Field
             label="Nombre completo"
             id="nombreCompleto"
@@ -170,7 +160,6 @@ export default function RegistroCliente() {
             tooltip="Ingresa nombres y apellidos completos"
           />
 
-          {/* Campo email */}
           <Field
             label="Correo electrónico"
             id="email"
@@ -183,7 +172,6 @@ export default function RegistroCliente() {
             tooltip="Debe contener @ y dominio válido"
           />
 
-          {/* Campo RUT */}
           <Field
             label="RUT"
             id="rut"
@@ -197,7 +185,6 @@ export default function RegistroCliente() {
             maxLength={10}
           />
 
-          {/* Campo teléfono */}
           <Field
             label="Teléfono"
             id="telefono"
@@ -213,10 +200,10 @@ export default function RegistroCliente() {
 
           <button
             onClick={handleSubmit}
-            disabled={loading}
-            style={{ ...styles.btnPrimary, opacity: loading ? 0.75 : 1 }}
+            disabled={isLoading}
+            style={{ ...styles.btnPrimary, opacity: isLoading ? 0.75 : 1 }}
           >
-            {loading ? 'Registrando...' : 'Registrar cliente'}
+            {isLoading ? 'Registrando...' : 'Registrar cliente'}
           </button>
 
           <p style={styles.cardFooter}>
@@ -228,8 +215,6 @@ export default function RegistroCliente() {
     </div>
   );
 }
-
-// ── Subcomponente Field ──────────────────────────────────────────────────────
 
 interface FieldProps {
   label: string;
@@ -273,8 +258,6 @@ function Field({ label, id, name, type, placeholder, value, onChange, error, too
     </div>
   );
 }
-
-// ── Estilos ──────────────────────────────────────────────────────────────────
 
 const styles: Record<string, React.CSSProperties> = {
   page: {

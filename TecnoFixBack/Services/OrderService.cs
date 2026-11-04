@@ -22,35 +22,42 @@ public class OrderService : IOrderService
         _context = context;
     }
 
-  public async Task<OrderResponseDto> CreateOrderAsync(CreateOrderDto dto)
-{
-    // Usar _context.Users.FindAsync o userRepository.ObtenerPorIdAsync
-    var client = await _context.Users.FindAsync(dto.ClientId);
-    
-    // Usar client.idRole o client.IdRole según esté definido en User.cs
-    if (client == null || client.idRole != 2)
+    public async Task<OrderResponseDto> CreateOrderAsync(CreateOrderDto dto)
     {
-        throw new ArgumentException("The specified client does not exist or is not registered as a client.");
+        var client = await _context.Users.FindAsync(dto.ClientId);
+        
+        // idRole 2 corresponds to Client
+        if (client == null || client.idRole != 2)
+        {
+            throw new ArgumentException("El cliente especificado no existe o no tiene rol de cliente.");
+        }
+
+        string brandAndModelFormatted = await ProcessAndNormalizeBrandAndModelAsync(dto.Brand, dto.Model);
+
+        // ORD-001 requirement: Assign status «Recibida» and record receipt timestamp
+        var order = new Order
+        {
+            clientId = dto.ClientId,
+            deviceType = dto.DeviceType,
+            brandAndModel = brandAndModelFormatted,
+            serialNumber = dto.SerialNumber,
+            issueDescription = dto.IssueDescription,
+            accessories = dto.Accessories,
+            status = "Recibida",
+            createdAt = DateTime.UtcNow
+        };
+
+        // ORD-001 requirement: Record first event in the audit log (bitácora)
+        var initialLog = new OrderLog
+        {
+            action = "Recepción de equipo - Estado: Recibida",
+            date = DateTime.UtcNow
+        };
+
+        var createdOrder = await _orderRepository.CreateOrderAsync(order, initialLog);
+
+        return MapToDto(createdOrder, client);
     }
-
-    string brandAndModelFormatted = await ProcessAndNormalizeBrandAndModelAsync(dto.Brand, dto.Model);
-
-    var order = new Order
-    {
-        clientId = dto.ClientId,
-        deviceType = dto.DeviceType,
-        brandAndModel = brandAndModelFormatted,
-        serialNumber = dto.SerialNumber,
-        issueDescription = dto.IssueDescription,
-        accessories = dto.Accessories,
-        status = "Ingresado",
-        createdAt = DateTime.UtcNow
-    };
-
-    var createdOrder = await _orderRepository.CreateAsync(order);
-
-    return MapToDto(createdOrder, client);
-}
 
     public async Task<IEnumerable<OrderResponseDto>> GetAllOrdersAsync()
     {
@@ -78,7 +85,7 @@ public class OrderService : IOrderService
         string cleanBrandName = rawBrand.Trim();
         string cleanModelName = rawModel?.Trim() ?? string.Empty;
 
-        // 1. Buscar o registrar la Marca sin duplicar por mayúsculas/minúsculas
+        // 1. Search or register Brand case-insensitively
         var brand = await _context.Brands
             .FirstOrDefaultAsync(b => b.Name.ToLower() == cleanBrandName.ToLower());
 
@@ -92,7 +99,7 @@ public class OrderService : IOrderService
             await _context.SaveChangesAsync();
         }
 
-        // 2. Si se especificó un modelo, buscarlo o registrarlo asociado a esa marca
+        // 2. If a model was specified, search or register it linked to that brand
         if (!string.IsNullOrWhiteSpace(cleanModelName))
         {
             var model = await _context.Models
@@ -131,6 +138,4 @@ public class OrderService : IOrderService
             CreatedAt = order.createdAt
         };
     }
-
-   
 }

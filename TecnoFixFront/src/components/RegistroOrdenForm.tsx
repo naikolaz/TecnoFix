@@ -1,209 +1,230 @@
 import { useState, useEffect } from 'react';
 import Select from 'react-select';
 import { useAuth } from '../context/useAuth';
-import { mostrarConfirmacion, mostrarExito, mostrarError } from '../utils/dialogo';
+import { getClients } from '../services/authService';
+import { getBrands, getModelsByBrand } from '../services/BrandServices';
+import { createOrder } from '../services/orderService';
+import { showConfirmationDialog, showSuccessDialog, showErrorDialog } from '../utils/dialogo';
+import { getErrorMessage } from '../utils/errores';
 
 interface OptionType {
   value: string | number;
   label: string;
 }
 
+interface OrderFormState {
+  deviceType: string;
+  customBrand: string;
+  customModel: string;
+  serialNumber: string;
+  issueDescription: string;
+  accessories: string;
+}
+
+interface OrderFormErrors {
+  client?: string;
+  deviceType?: string;
+  brandAndModel?: string;
+  issueDescription?: string;
+}
+
 export default function RegistroOrdenForm() {
-  const { token } = useAuth();
+  const { isAuthenticated } = useAuth();
 
-  // Estados de Opciones
-  const [clientesOptions, setClientesOptions] = useState<OptionType[]>([]);
-  const [marcasOptions, setMarcasOptions] = useState<OptionType[]>([]);
-  const [modelosOptions, setModelosOptions] = useState<OptionType[]>([]);
+  // Dropdown options
+  const [clientsOptions, setClientsOptions] = useState<OptionType[]>([]);
+  const [brandsOptions, setBrandsOptions] = useState<OptionType[]>([]);
+  const [modelsOptions, setModelsOptions] = useState<OptionType[]>([]);
 
-  // Estados de Selección
-  const [selectedCliente, setSelectedCliente] = useState<OptionType | null>(null);
-  const [selectedMarca, setSelectedMarca] = useState<OptionType | null>(null);
-  const [selectedModelo, setSelectedModelo] = useState<OptionType | null>(null);
+  // Selected values
+  const [selectedClient, setSelectedClient] = useState<OptionType | null>(null);
+  const [selectedBrand, setSelectedBrand] = useState<OptionType | null>(null);
+  const [selectedModel, setSelectedModel] = useState<OptionType | null>(null);
 
-  // Estados de Formulario Completo
-  const [formData, setFormData] = useState({
-    tipoEquipo: '',
-    marcaOtra: '',
-    modeloOtro: '',
-    numeroSerie: '',
-    descripcionFalla: '',
-    accesorios: ''
+  // Form input data
+  const [formData, setFormData] = useState<OrderFormState>({
+    deviceType: '',
+    customBrand: '',
+    customModel: '',
+    serialNumber: '',
+    issueDescription: '',
+    accessories: ''
   });
 
-  const [cargando, setCargando] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<OrderFormErrors>({});
+  const [isLoading, setIsLoading] = useState(false);
 
-  // 1. Cargar Clientes (Carga funcional formateada como [RUT / Nombre])
+  // 1. Load clients
   useEffect(() => {
-    const cargarClientes = async () => {
+    const loadClients = async () => {
       try {
-        const respuesta = await fetch('http://localhost:5199/api/Auth/clientes', {
-          headers: { 
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        });
+        const clientList = await getClients();
 
-        if (!respuesta.ok) {
-          console.error("Error al obtener clientes. Status:", respuesta.status);
-          return;
-        }
-
-        const listaClientes: any[] = await respuesta.json();
-
-        const opciones: OptionType[] = listaClientes.map((c: any) => {
-          const clientId = c.id ?? c.ID ?? 0;
-          const nombre = c.name ?? c.Name ?? 'Cliente sin nombre';
-          const rutBruto = c.rut ?? c.RUT ?? 'Sin RUT';
-          const rutLimpio = String(rutBruto).replace(/[^0-9kK]/g, '').toUpperCase();
+        const options: OptionType[] = clientList.map((client) => {
+          const clientId = client.id ?? 0;
+          const name = client.nombreCompleto ?? client.name ?? 'Cliente sin nombre';
+          const rawRut = client.rut ?? 'Sin RUT';
+          const cleanRut = String(rawRut).replace(/[^0-9kK]/g, '').toUpperCase();
 
           return {
             value: Number(clientId),
-            label: `[${rutLimpio || 'SIN RUT'} / ${nombre}]`
+            label: `[${cleanRut || 'SIN RUT'} / ${name}]`
           };
-        }).filter(opcion => Number(opcion.value) > 0);
+        }).filter(option => Number(option.value) > 0);
 
-        setClientesOptions(opciones);
-
+        setClientsOptions(options);
       } catch (error) {
-        console.error('Error de red al cargar clientes:', error);
+        console.error('Error al cargar clientes:', error);
       }
     };
 
-    if (token) cargarClientes();
-  }, [token]);
+    if (isAuthenticated) loadClients();
+  }, [isAuthenticated]);
 
-  // 2. Cargar Marcas
+  // 2. Load brands
   useEffect(() => {
-    const cargarMarcas = async () => {
+    const loadBrands = async () => {
       try {
-        const respuesta = await fetch('http://localhost:5199/api/Brand', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-
-        if (respuesta.ok) {
-          const data = await respuesta.json();
-          const opciones: OptionType[] = data.map((m: any) => ({
-            value: m.id ?? m.Id,
-            label: m.name ?? m.Name ?? m.nombre
-          }));
-          opciones.push({ value: 'otra', label: '-- Otra marca (Ingresar manualmente) --' });
-          setMarcasOptions(opciones);
-        }
+        const brands = await getBrands();
+        const options: OptionType[] = brands.map((b) => ({
+          value: b.id,
+          label: b.name
+        }));
+        options.push({ value: 'otra', label: '-- Otra marca (Ingresar manualmente) --' });
+        setBrandsOptions(options);
       } catch (error) {
         console.error('Error al cargar marcas:', error);
       }
     };
 
-    if (token) cargarMarcas();
-  }, [token]);
+    if (isAuthenticated) loadBrands();
+  }, [isAuthenticated]);
 
-  // 3. Cargar Modelos al seleccionar una marca existente
+  // 3. Load models when brand changes
   useEffect(() => {
-    const cargarModelos = async () => {
-      if (!selectedMarca || selectedMarca.value === 'otra') {
-        setModelosOptions([]);
-        setSelectedModelo(null);
+    const loadModels = async () => {
+      if (!selectedBrand || selectedBrand.value === 'otra') {
+        setModelsOptions([]);
+        setSelectedModel(null);
         return;
       }
 
       try {
-        const respuesta = await fetch(`http://localhost:5199/api/Brand/${selectedMarca.value}/models`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-
-        if (respuesta.ok) {
-          const data = await respuesta.json();
-          const opciones: OptionType[] = data.map((mod: any) => ({
-            value: mod.id ?? mod.Id,
-            label: mod.name ?? mod.Name ?? mod.nombre
-          }));
-          opciones.push({ value: 'otro', label: '-- Otro modelo (Ingresar manualmente) --' });
-          setModelosOptions(opciones);
-        }
+        const models = await getModelsByBrand(selectedBrand.value);
+        const options: OptionType[] = models.map((m) => ({
+          value: m.id,
+          label: m.name
+        }));
+        options.push({ value: 'otro', label: '-- Otro modelo (Ingresar manualmente) --' });
+        setModelsOptions(options);
       } catch (error) {
         console.error('Error al cargar modelos:', error);
       }
     };
 
-    cargarModelos();
-  }, [selectedMarca, token]);
+    loadModels();
+  }, [selectedBrand]);
 
-  // Validar si la marca ingresada manualmente ya existe en el listado
-  const marcaExistenteCoincidencia = String(selectedMarca?.value) === 'otra' && formData.marcaOtra.trim() !== ''
-    ? marcasOptions.find(m => 
-        String(m.value) !== 'otra' && 
-        m.label.trim().toLowerCase() === formData.marcaOtra.trim().toLowerCase()
+  // Check if manually entered brand already exists
+  const matchingExistingBrand = String(selectedBrand?.value) === 'otra' && formData.customBrand.trim() !== ''
+    ? brandsOptions.find(b => 
+        String(b.value) !== 'otra' && 
+        b.label.trim().toLowerCase() === formData.customBrand.trim().toLowerCase()
       )
     : null;
+
+  // Validation function enforcing ORD-001: «Debe completar el campo <<indicar campo>>»
+  const validateForm = (): boolean => {
+    const errors: OrderFormErrors = {};
+
+    if (!selectedClient) {
+      errors.client = 'Debe completar el campo Cliente';
+    }
+
+    if (!formData.deviceType.trim()) {
+      errors.deviceType = 'Debe completar el campo Tipo de equipo';
+    }
+
+    if (!selectedBrand || (selectedBrand.value === 'otra' && !formData.customBrand.trim())) {
+      errors.brandAndModel = 'Debe completar el campo Marca y modelo';
+    }
+
+    if (!formData.issueDescription.trim()) {
+      errors.issueDescription = 'Debe completar el campo Descripción de la falla';
+    }
+
+    setFieldErrors(errors);
+
+    // Show explicit error popup with the first missing mandatory field
+    const firstErrorMessage = errors.client 
+      || errors.deviceType 
+      || errors.brandAndModel 
+      || errors.issueDescription;
+
+    if (firstErrorMessage) {
+      showErrorDialog('Validación requerida', firstErrorMessage);
+      return false;
+    }
+
+    return true;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!selectedCliente || !formData.tipoEquipo || !selectedMarca || !formData.descripcionFalla) {
-      mostrarError("Campos incompletos", "Por favor, completa todos los campos obligatorios (*)");
-      return;
-    }
+    if (!validateForm()) return;
 
-    const confirmado = await mostrarConfirmacion({
-      titulo: 'Confirmación de Orden (NF01)',
-      mensaje: '¿Está seguro de registrar esta nueva orden en el sistema TecnoFix?',
-      textoBotonConfirmar: 'Sí, registrar orden',
-      textoBotonCancelar: 'Cancelar'
+    const isConfirmed = await showConfirmationDialog({
+      title: 'Confirmación de Orden (ORD-001)',
+      message: '¿Está seguro de registrar esta nueva orden de reparación en el sistema TecnoFix?',
+      confirmButtonText: 'Sí, registrar orden',
+      cancelButtonText: 'Cancelar'
     });
 
-    if (!confirmado) return;
+    if (!isConfirmed) return;
 
-    setCargando(true);
+    setIsLoading(true);
 
-    const brandName = selectedMarca.value === 'otra' ? formData.marcaOtra : selectedMarca.label;
-    const modelName = (selectedMarca.value === 'otra' || selectedModelo?.value === 'otro')
-      ? formData.modeloOtro 
-      : (selectedModelo?.label ?? null);
+    const brandName = selectedBrand?.value === 'otra' ? formData.customBrand.trim() : (selectedBrand?.label ?? '');
+    const modelName = (selectedBrand?.value === 'otra' || selectedModel?.value === 'otro')
+      ? formData.customModel.trim() 
+      : (selectedModel?.label ?? '');
 
-    const ordenPayload = {
-      clientId: Number(selectedCliente.value),
-      deviceType: formData.tipoEquipo,
+    const orderPayload = {
+      clientId: Number(selectedClient?.value),
+      deviceType: formData.deviceType.trim(),
       brand: brandName,
-      model: modelName || null,
-      serialNumber: formData.numeroSerie || null,
-      issueDescription: formData.descripcionFalla,
-      accessories: formData.accesorios || null
+      model: modelName || undefined,
+      serialNumber: formData.serialNumber.trim() || undefined,
+      issueDescription: formData.issueDescription.trim(),
+      accessories: formData.accessories.trim() || undefined
     };
 
     try {
-      const respuesta = await fetch('http://localhost:5199/api/Order', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(ordenPayload)
+      const createdOrder = await createOrder(orderPayload);
+      showSuccessDialog(
+        '¡Orden Registrada!', 
+        `La orden N° ${createdOrder.id} ha sido registrada con estado «${createdOrder.status}». Fecha de recepción: ${new Date(createdOrder.createdAt).toLocaleString()}.`
+      );
+
+      // Reset form
+      setSelectedClient(null);
+      setSelectedBrand(null);
+      setSelectedModel(null);
+      setFieldErrors({});
+      setFormData({
+        deviceType: '',
+        customBrand: '',
+        customModel: '',
+        serialNumber: '',
+        issueDescription: '',
+        accessories: ''
       });
-
-      if (respuesta.ok) {
-        const data = await respuesta.json();
-        mostrarExito('¡Orden Registrada!', `La orden N° ${data.id ?? ''} ha sido creada exitosamente.`);
-
-        setSelectedCliente(null);
-        setSelectedMarca(null);
-        setSelectedModelo(null);
-        setFormData({
-          tipoEquipo: '',
-          marcaOtra: '',
-          modeloOtro: '',
-          numeroSerie: '',
-          descripcionFalla: '',
-          accesorios: ''
-        });
-      } else {
-        const errorData = await respuesta.json().catch(() => null);
-        mostrarError('Error del servidor', errorData?.message || 'No se pudo crear la orden.');
-      }
     } catch (error) {
-      mostrarError('Error de red', 'No se pudo conectar con el servidor.');
+      const message = getErrorMessage(error);
+      showErrorDialog('Error al registrar la orden', message);
     } finally {
-      setCargando(false);
+      setIsLoading(false);
     }
   };
 
@@ -220,37 +241,58 @@ export default function RegistroOrdenForm() {
 
   return (
     <div style={{ background: 'var(--color-superficie, #fff)', padding: '32px', borderRadius: '12px', border: '1px solid var(--color-borde, #ccc)', maxWidth: '900px', margin: '32px auto' }}>
-      <h2>Registrar Orden de Reparación</h2>
+      <h2>Registrar Orden de Reparación (ORD-001)</h2>
+      <p style={{ color: 'var(--color-texto-suave, #666)', marginBottom: '20px' }}>
+        Complete los datos del equipo recibido. Los campos con (*) son obligatorios.
+      </p>
 
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} noValidate>
         
-        {/* Autocompletado de Cliente */}
+        {/* Cliente */}
         <div className="campo">
           <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>
-            Cliente (Buscar por RUT o Nombre) *
+            Cliente (Seleccionar del listado) *
           </label>
           <Select
-            options={clientesOptions}
-            value={selectedCliente}
-            onChange={(option) => setSelectedCliente(option)}
+            options={clientsOptions}
+            value={selectedClient}
+            onChange={(option) => {
+              setSelectedClient(option);
+              setFieldErrors(prev => ({ ...prev, client: undefined }));
+            }}
             placeholder="Buscar cliente ej: [21613092 / Juan Perez]..."
             noOptionsMessage={() => "No se encontraron clientes registrados"}
             isClearable
             isSearchable
             styles={customSelectStyles}
           />
+          {fieldErrors.client && (
+            <p style={{ color: '#d9534f', fontSize: '0.85rem', marginTop: '4px' }}>
+              {fieldErrors.client}
+            </p>
+          )}
         </div>
 
         <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
           
-          {/* Selector Tipo de Equipo */}
+          {/* Tipo de Equipo */}
           <div className="campo" style={{ flex: '1 1 300px' }}>
-            <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>Tipo de Equipo *</label>
+            <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>
+              Tipo de equipo *
+            </label>
             <select
-              value={formData.tipoEquipo}
-              onChange={(e) => setFormData(prev => ({ ...prev, tipoEquipo: e.target.value }))}
-              style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--color-borde, #ccc)' }}
-              required
+              value={formData.deviceType}
+              onChange={(e) => {
+                const val = e.target.value;
+                setFormData(prev => ({ ...prev, deviceType: val }));
+                setFieldErrors(prev => ({ ...prev, deviceType: undefined }));
+              }}
+              style={{ 
+                width: '100%', 
+                padding: '10px', 
+                borderRadius: '8px', 
+                border: fieldErrors.deviceType ? '1.5px solid #d9534f' : '1px solid var(--color-borde, #ccc)' 
+              }}
             >
               <option value="">Seleccione tipo...</option>
               <option value="Notebook">Notebook</option>
@@ -261,75 +303,94 @@ export default function RegistroOrdenForm() {
               <option value="Impresora">Impresora</option>
               <option value="Otro">Otro</option>
             </select>
+            {fieldErrors.deviceType && (
+              <p style={{ color: '#d9534f', fontSize: '0.85rem', marginTop: '4px' }}>
+                {fieldErrors.deviceType}
+              </p>
+            )}
           </div>
 
-          {/* Autocompletado de Marca */}
+          {/* Marca */}
           <div className="campo" style={{ flex: '1 1 300px' }}>
-            <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>Marca *</label>
+            <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>
+              Marca y modelo (Marca) *
+            </label>
             <Select
-              options={marcasOptions}
-              value={selectedMarca}
-              onChange={(option) => setSelectedMarca(option)}
+              options={brandsOptions}
+              value={selectedBrand}
+              onChange={(option) => {
+                setSelectedBrand(option);
+                setFieldErrors(prev => ({ ...prev, brandAndModel: undefined }));
+              }}
               placeholder="Buscar marca (ej: Samsung, Asus)..."
               isClearable
               isSearchable
               styles={customSelectStyles}
             />
 
-            {selectedMarca?.value === 'otra' && (
+            {selectedBrand?.value === 'otra' && (
               <div style={{ marginTop: '10px' }}>
                 <input
                   type="text"
                   placeholder="Especifique el nombre de la nueva marca..."
-                  value={formData.marcaOtra}
-                  onChange={(e) => setFormData(prev => ({ ...prev, marcaOtra: e.target.value }))}
+                  value={formData.customBrand}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setFormData(prev => ({ ...prev, customBrand: val }));
+                    setFieldErrors(prev => ({ ...prev, brandAndModel: undefined }));
+                  }}
                   style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #ccc' }}
-                  required
                 />
-                {marcaExistenteCoincidencia && (
+                {matchingExistingBrand && (
                   <p style={{ color: '#d9534f', fontSize: '0.85rem', marginTop: '6px' }}>
-                    La marca "{formData.marcaOtra}" ya existe en el sistema. Considere seleccionarla de la lista.
+                    La marca "{formData.customBrand}" ya existe en el sistema. Considere seleccionarla de la lista.
                   </p>
                 )}
               </div>
+            )}
+            {fieldErrors.brandAndModel && (
+              <p style={{ color: '#d9534f', fontSize: '0.85rem', marginTop: '4px' }}>
+                {fieldErrors.brandAndModel}
+              </p>
             )}
           </div>
         </div>
 
         <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
           
-          {/* Autocompletado de Modelo */}
+          {/* Modelo */}
           <div className="campo" style={{ flex: '1 1 300px' }}>
-            <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>Modelo</label>
+            <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>
+              Modelo
+            </label>
             
-            {/* Si elige "Otra marca", habilitamos directamente la entrada manual del modelo */}
-            {selectedMarca?.value === 'otra' ? (
+            {selectedBrand?.value === 'otra' ? (
               <input
                 type="text"
                 placeholder="Especifique el modelo para esta nueva marca..."
-                value={formData.modeloOtro}
-                onChange={(e) => setFormData(prev => ({ ...prev, modeloOtro: e.target.value }))}
+                value={formData.customModel}
+                onChange={(e) => setFormData(prev => ({ ...prev, customModel: e.target.value }))}
                 style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ccc' }}
               />
             ) : (
               <>
                 <Select
-                  options={modelosOptions}
-                  value={selectedModelo}
-                  onChange={(option) => setSelectedModelo(option)}
-                  placeholder={selectedMarca ? "Buscar modelo..." : "Primero elija una marca"}
-                  isDisabled={!selectedMarca}
+                  options={modelsOptions}
+                  value={selectedModel}
+                  onChange={(option) => setSelectedModel(option)}
+                  placeholder={selectedBrand ? "Buscar modelo..." : "Primero elija una marca"}
+                  isDisabled={!selectedBrand}
                   isClearable
                   isSearchable
                   styles={customSelectStyles}
                 />
 
-                {selectedModelo?.value === 'otro' && (
+                {selectedModel?.value === 'otro' && (
                   <input
                     type="text"
                     placeholder="Especifique el modelo..."
-                    value={formData.modeloOtro}
-                    onChange={(e) => setFormData(prev => ({ ...prev, modeloOtro: e.target.value }))}
+                    value={formData.customModel}
+                    onChange={(e) => setFormData(prev => ({ ...prev, customModel: e.target.value }))}
                     style={{ marginTop: '10px', width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #ccc' }}
                   />
                 )}
@@ -337,55 +398,75 @@ export default function RegistroOrdenForm() {
             )}
           </div>
 
-          {/* Número de Serie */}
+          {/* Número de Serie (opcional) */}
           <div className="campo" style={{ flex: '1 1 300px' }}>
-            <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>Número de Serie (S/N)</label>
+            <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>
+              Número de serie (opcional)
+            </label>
             <input
               type="text"
               placeholder="Ej: S/N 987654321"
-              value={formData.numeroSerie}
-              onChange={(e) => setFormData(prev => ({ ...prev, numeroSerie: e.target.value }))}
+              value={formData.serialNumber}
+              onChange={(e) => setFormData(prev => ({ ...prev, serialNumber: e.target.value }))}
               style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--color-borde, #ccc)' }}
             />
           </div>
         </div>
 
-        {/* Descripción de la Falla */}
+        {/* Descripción de la Falla reportada (obligatorio) */}
         <div className="campo">
-          <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>Descripción de la Falla *</label>
+          <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>
+            Descripción de la falla reportada *
+          </label>
           <textarea
-            value={formData.descripcionFalla}
-            onChange={(e) => setFormData(prev => ({ ...prev, descripcionFalla: e.target.value }))}
-            style={{ width: '100%', minHeight: '100px', padding: '10px', borderRadius: '8px', border: '1px solid var(--color-borde, #ccc)' }}
-            placeholder="Describe el problema reportado..."
-            required
+            value={formData.issueDescription}
+            onChange={(e) => {
+              const val = e.target.value;
+              setFormData(prev => ({ ...prev, issueDescription: val }));
+              setFieldErrors(prev => ({ ...prev, issueDescription: undefined }));
+            }}
+            style={{ 
+              width: '100%', 
+              minHeight: '100px', 
+              padding: '10px', 
+              borderRadius: '8px', 
+              border: fieldErrors.issueDescription ? '1.5px solid #d9534f' : '1px solid var(--color-borde, #ccc)' 
+            }}
+            placeholder="Describe el problema reportado por el cliente..."
           />
+          {fieldErrors.issueDescription && (
+            <p style={{ color: '#d9534f', fontSize: '0.85rem', marginTop: '4px' }}>
+              {fieldErrors.issueDescription}
+            </p>
+          )}
         </div>
 
-        {/* Accesorios */}
+        {/* Accesorios entregados (opcional) */}
         <div className="campo">
-          <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>Accesorios Dejados</label>
+          <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>
+            Accesorios entregados (opcional)
+          </label>
           <input
             type="text"
-            placeholder="Ej: Cargador, funda, mouse..."
-            value={formData.accesorios}
-            onChange={(e) => setFormData(prev => ({ ...prev, accesorios: e.target.value }))}
+            placeholder="Ej: Cargador original, funda, adaptador..."
+            value={formData.accessories}
+            onChange={(e) => setFormData(prev => ({ ...prev, accessories: e.target.value }))}
             style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid var(--color-borde, #ccc)' }}
           />
         </div>
 
         <button 
           type="submit" 
-          disabled={cargando}
+          disabled={isLoading}
           className="boton boton--primario" 
           style={{ 
             padding: '14px', 
             fontSize: '1.1rem',
-            cursor: cargando ? 'not-allowed' : 'pointer',
-            opacity: cargando ? 0.7 : 1 
+            cursor: isLoading ? 'not-allowed' : 'pointer',
+            opacity: isLoading ? 0.7 : 1 
           }}
         >
-          {cargando ? 'Registrando...' : 'Registrar Orden'}
+          {isLoading ? 'Registrando orden...' : 'Registrar orden de reparación'}
         </button>
       </form>
     </div>

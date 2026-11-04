@@ -1,48 +1,61 @@
 import Swal from 'sweetalert2';
 
-interface ConfirmarOptions {
+interface ConfirmationOptions {
+  title?: string;
   titulo?: string;
-  mensaje: string;
+  message?: string;
+  mensaje?: string;
+  confirmButtonText?: string;
   textoBotonConfirmar?: string;
+  cancelButtonText?: string;
   textoBotonCancelar?: string;
 }
 
-export const mostrarConfirmacion = async ({
+export const showConfirmationDialog = async ({
+  title,
   titulo = '¿Confirmar Acción?',
+  message,
   mensaje,
+  confirmButtonText,
   textoBotonConfirmar = 'Sí, continuar',
+  cancelButtonText,
   textoBotonCancelar = 'Cancelar'
-}: ConfirmarOptions): Promise<boolean> => {
-  const resultado = await Swal.fire({
-    title: titulo,
-    text: mensaje,
+}: ConfirmationOptions): Promise<boolean> => {
+  const result = await Swal.fire({
+    title: title ?? titulo,
+    text: message ?? mensaje,
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#0056b3', // Color primario de TecnoFix
+    confirmButtonColor: '#0056b3', // TecnoFix primary color
     cancelButtonColor: '#6c757d',
-    confirmButtonText: textoBotonConfirmar,
-    cancelButtonText: textoBotonCancelar,
+    confirmButtonText: confirmButtonText ?? textoBotonConfirmar,
+    cancelButtonText: cancelButtonText ?? textoBotonCancelar,
     reverseButtons: true,
     focusCancel: true
   });
 
-  return resultado.isConfirmed;
+  return result.isConfirmed;
 };
 
-export const mostrarExito = (titulo: string, mensaje?: string) => {
+export const showSuccessDialog = (title: string, message?: string) => {
   Swal.fire({
-    title: titulo,
-    text: mensaje,
+    title,
+    text: message,
     icon: 'success',
     confirmButtonColor: '#0056b3'
   });
 };
 
-export const mostrarError = (titulo: string, mensaje?: string) => {
+export const showErrorDialog = (title: string, message?: string) => {
   Swal.fire({
-    title: titulo,
-    text: mensaje,
+    title,
+    text: message,
     icon: 'error',
     confirmButtonColor: '#0056b3'
   });
 };
+
+// Aliases for compatibility
+export const mostrarConfirmacion = showConfirmationDialog;
+export const mostrarExito = showSuccessDialog;
+export const mostrarError = showErrorDialog;

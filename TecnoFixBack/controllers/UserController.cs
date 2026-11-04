@@ -6,7 +6,7 @@ namespace TecnoFixBack.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize] // O [Authorize(Roles = "Administrador")] según tus requerimientos
+[Authorize]
 public class UsersController : ControllerBase
 {
     private readonly IUserRepository _userRepository;
@@ -17,12 +17,11 @@ public class UsersController : ControllerBase
     }
 
     [HttpGet("clients")]
-   public async Task<IActionResult> GetClients(CancellationToken cancellationToken)
-{
+    public async Task<IActionResult> GetClients(CancellationToken cancellationToken)
+    {
         try
         {
-           var clients = await _userRepository.ObtenerClientesAsync(cancellationToken);
-            // Mapear a DTO para evitar referencias circulares en JSON
+            var clients = await _userRepository.GetClientsAsync(cancellationToken);
             var clientDtos = clients.Select(c => new 
             {
                 c.ID,
