@@ -1,0 +1,9 @@
+**/bin/
+**/obj/
+.git/
+.vs/
+.vscode/
+TecnoFixFront/
+*.user
+*.suo
+TecnoFixBack/appsettings.Development.json
