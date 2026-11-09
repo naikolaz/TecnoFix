@@ -2,11 +2,17 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using TecnoFixBack.Data;
+using TecnoFixBack.Interfaces;
+using TecnoFixBack.Repositories;
 using TecnoFixBack.Services;
+<<<<<<< HEAD
 using TecnoFixBack.src.Data;
 using TecnoFixBack.src.interfaces;
 using TecnoFixBack.src.Repositories;
 using TecnoFixBack.src.services;
+=======
+>>>>>>> d9c9274f928d258a431039b66e9e187b47d39a30
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,10 +24,10 @@ if (!string.IsNullOrEmpty(port))
 }
 
 builder.Services.AddControllers();
-
 builder.Services.AddDbContext<TecnoFixContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("NeonDB")));
 
+<<<<<<< HEAD
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<ILoginService, LoginService>();
@@ -29,6 +35,19 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEmailService, SendGridEmailService>();
 
 var jwtKey = builder.Configuration["Jwt:Key"]
+=======
+// Inyección de dependencias
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IOrderRepository, OrderRepository>(); 
+
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<ILoginService, LoginService>();
+builder.Services.AddScoped<IEmailService, SendGridEmailService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+
+var jwtKey = builder.Configuration["Jwt:Key"] 
+>>>>>>> d9c9274f928d258a431039b66e9e187b47d39a30
     ?? throw new InvalidOperationException("Falta configurar Jwt:Key en appsettings.");
 
 builder.Services
@@ -50,16 +69,17 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
+<<<<<<< HEAD
 var origenesPermitidos = builder.Configuration.GetSection("Cors:OrigenesPermitidos").Get<string[]>()
     ?? ["http://localhost:5173", "https://techno-fix-ochre.vercel.app"];
 
+=======
+>>>>>>> d9c9274f928d258a431039b66e9e187b47d39a30
 builder.Services.AddCors(options =>
-{
     options.AddPolicy("Frontend", policy =>
         policy.AllowAnyOrigin()
               .AllowAnyHeader()
-              .AllowAnyMethod());
-});
+              .AllowAnyMethod()));
 
 builder.Services.AddOpenApi();
 
@@ -75,7 +95,11 @@ using (var scope = app.Services.CreateScope())
     catch (Exception ex)
     {
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+<<<<<<< HEAD
         logger.LogError(ex, "Ocurrió un error al aplicar migraciones automáticas a la base de datos.");
+=======
+        logger.LogError(ex, "Ocurrió un error al aplicar las migraciones automáticas a la base de datos.");
+>>>>>>> d9c9274f928d258a431039b66e9e187b47d39a30
     }
 }
 
@@ -90,9 +114,9 @@ else if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("RENDER")))
 }
 
 app.UseCors("Frontend");
-
 app.UseAuthentication();
 app.UseAuthorization();
+<<<<<<< HEAD
 
 // Endpoints de salud y verificación para Render
 app.MapGet("/", () => Results.Ok(new 
@@ -105,6 +129,8 @@ app.MapGet("/", () => Results.Ok(new
 
 app.MapGet("/health", () => Results.Ok(new { status = "healthy" }));
 
+=======
+>>>>>>> d9c9274f928d258a431039b66e9e187b47d39a30
 app.MapControllers();
 
 app.Run();

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using TecnoFixBack.src.Data;
+using TecnoFixBack.Data;
 
 #nullable disable
 
@@ -22,14 +22,13 @@ namespace TecnoFixBack.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("TecnoFixBack.src.model.Rol", b =>
+            modelBuilder.Entity("TecnoFixBack.Models.Brand", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-                    NpgsqlPropertyBuilderExtensions.HasIdentityOptions(b.Property<int>("Id"), 4L, null, null, null, null, null);
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -37,100 +36,304 @@ namespace TecnoFixBack.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Roles");
+                    b.ToTable("Brands");
 
                     b.HasData(
                         new
                         {
                             Id = 1,
-                            Name = "Administrador"
+                            Name = "Asus"
                         },
                         new
                         {
                             Id = 2,
-                            Name = "Cliente"
+                            Name = "HP"
                         },
                         new
                         {
                             Id = 3,
-                            Name = "Técnico"
+                            Name = "Lenovo"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Dell"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Apple"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Name = "Samsung"
+                        },
+                        new
+                        {
+                            Id = 7,
+                            Name = "Acer"
+                        },
+                        new
+                        {
+                            Id = 8,
+                            Name = "MSI"
                         });
                 });
 
-            modelBuilder.Entity("TecnoFixBack.src.model.User", b =>
+            modelBuilder.Entity("TecnoFixBack.Models.DeviceModel", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-                    NpgsqlPropertyBuilderExtensions.HasIdentityOptions(b.Property<int>("Id"), 2L, null, null, null, null, null);
 
-                    b.Property<DateTime>("CreateOnly")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Especialidad")
-                        .HasColumnType("text");
-
-                    b.Property<int>("IdRol")
+                    b.Property<int>("BrandId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("NombreCompleto")
+                    b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Rut")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Telefono")
                         .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Email")
-                        .IsUnique();
+                    b.HasIndex("BrandId");
 
-                    b.HasIndex("IdRol");
+                    b.ToTable("Models");
+                });
 
-                    b.HasIndex("Rut")
-                        .IsUnique();
+            modelBuilder.Entity("TecnoFixBack.Models.Order", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
 
-                    b.ToTable("Usuarios");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("id"));
+
+                    b.Property<int?>("ClientId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("accessories")
+                        .HasColumnType("text");
+
+                    b.Property<string>("brandAndModel")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("clientId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("createdAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("deviceType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("issueDescription")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("serialNumber")
+                        .HasColumnType("text");
+
+                    b.Property<string>("status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("id");
+
+                    b.HasIndex("ClientId");
+
+                    b.HasIndex("clientId");
+
+                    b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("TecnoFixBack.Models.OrderLog", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("id"));
+
+                    b.Property<string>("action")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("date")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("orderId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("id");
+
+                    b.HasIndex("orderId");
+
+                    b.ToTable("Loggers");
+                });
+
+            modelBuilder.Entity("TecnoFixBack.Models.Role", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
+                    NpgsqlPropertyBuilderExtensions.HasIdentityOptions(b.Property<int>("ID"), 4L, null, null, null, null, null);
+
+                    b.Property<string>("name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Roles");
 
                     b.HasData(
                         new
                         {
-                            Id = 1,
-                            CreateOnly = new DateTime(2026, 9, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "admin@tecnofix.cl",
-                            IdRol = 1,
-                            NombreCompleto = "Administrador TecnoFix",
-                            Password = "$2a$11$p1aaLoFneaW8kzCJCPJDJe5qJlJm19DomNZtN4U7J2jm8YvlMW3p."
+                            ID = 1,
+                            name = "Administrador"
+                        },
+                        new
+                        {
+                            ID = 2,
+                            name = "Cliente"
+                        },
+                        new
+                        {
+                            ID = 3,
+                            name = "Técnico"
                         });
                 });
 
-            modelBuilder.Entity("TecnoFixBack.src.model.User", b =>
+            modelBuilder.Entity("TecnoFixBack.Models.User", b =>
                 {
-                    b.HasOne("TecnoFixBack.src.model.Rol", "Rol")
-                        .WithMany("Usuarios")
-                        .HasForeignKey("IdRol")
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
+                    NpgsqlPropertyBuilderExtensions.HasIdentityOptions(b.Property<int>("ID"), 2L, null, null, null, null, null);
+
+                    b.Property<DateTime>("CreateOnly")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RUT")
+                        .HasColumnType("text");
+
+                    b.Property<string>("email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("idRole")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("password")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("specialization")
+                        .HasColumnType("text");
+
+                    b.Property<string>("telephoneNumber")
+                        .HasColumnType("text");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("RUT")
+                        .IsUnique();
+
+                    b.HasIndex("email")
+                        .IsUnique();
+
+                    b.HasIndex("idRole");
+
+                    b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            ID = 1,
+                            CreateOnly = new DateTime(2026, 9, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            email = "admin@tecnofix.cl",
+                            idRole = 1,
+                            name = "Administrador TecnoFix",
+                            password = "$2a$11$p1aaLoFneaW8kzCJCPJDJe5qJlJm19DomNZtN4U7J2jm8YvlMW3p."
+                        });
+                });
+
+            modelBuilder.Entity("TecnoFixBack.Models.DeviceModel", b =>
+                {
+                    b.HasOne("TecnoFixBack.Models.Brand", "Brand")
+                        .WithMany("Models")
+                        .HasForeignKey("BrandId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Rol");
+                    b.Navigation("Brand");
                 });
 
-            modelBuilder.Entity("TecnoFixBack.src.model.Rol", b =>
+            modelBuilder.Entity("TecnoFixBack.Models.Order", b =>
                 {
-                    b.Navigation("Usuarios");
+                    b.HasOne("TecnoFixBack.Models.User", "Client")
+                        .WithMany()
+                        .HasForeignKey("ClientId");
+
+                    b.HasOne("TecnoFixBack.Models.User", "client")
+                        .WithMany()
+                        .HasForeignKey("clientId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Client");
+
+                    b.Navigation("client");
+                });
+
+            modelBuilder.Entity("TecnoFixBack.Models.OrderLog", b =>
+                {
+                    b.HasOne("TecnoFixBack.Models.Order", "order")
+                        .WithMany("history")
+                        .HasForeignKey("orderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("order");
+                });
+
+            modelBuilder.Entity("TecnoFixBack.Models.User", b =>
+                {
+                    b.HasOne("TecnoFixBack.Models.Role", "role")
+                        .WithMany("Users")
+                        .HasForeignKey("idRole")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("role");
+                });
+
+            modelBuilder.Entity("TecnoFixBack.Models.Brand", b =>
+                {
+                    b.Navigation("Models");
+                });
+
+            modelBuilder.Entity("TecnoFixBack.Models.Order", b =>
+                {
+                    b.Navigation("history");
+                });
+
+            modelBuilder.Entity("TecnoFixBack.Models.Role", b =>
+                {
+                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }

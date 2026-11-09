@@ -1,4 +1,5 @@
-export type Rol = 'Administrador' | 'Técnico' | 'Cliente'
+export type Role = 'Administrador' | 'Técnico' | 'Cliente'
+export type Rol = Role
 
 export interface LoginRequest {
   email: string
@@ -9,20 +10,31 @@ export interface LoginResponse {
   token: string
   expiracion: string
   id: number
-  nombreCompleto: string
+  name?: string
+  nombreCompleto?: string
   email: string
-  rol: Rol
+  role?: string
+  rol?: string | Role
+  idRole?: number
 }
 
-export interface UsuarioSesion {
+export interface UserSession {
   id: number
+  fullName: string
   nombreCompleto: string
   email: string
-  rol: Rol
+  role: Role
+  rol: Role
 }
 
-export interface SesionGuardada {
+export type UsuarioSesion = UserSession
+
+export interface SavedSession {
   token: string
+  expiration: string
   expiracion: string
-  usuario: UsuarioSesion
+  user: UserSession
+  usuario: UserSession
 }
+
+export type SesionGuardada = SavedSession
