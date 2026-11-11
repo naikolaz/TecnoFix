@@ -26,3 +26,25 @@ export const crearOrden = createOrder;
 export const obtenerOrdenes = getAllOrders;
 export const obtenerOrdenPorId = getOrderById;
 export const obtenerOrdenesPorCliente = getOrdersByClientId;
+
+export interface UpdateDiagnosisDto {
+  technicalDiagnosis: string;
+  laborCost: number;
+  partsCost: number;
+}
+
+export const getOrdersForDiagnosis = async () => {
+  // Usamos el endpoint base de órdenes y filtramos en el frontend
+  const response = await api.get('/Order');
+  const allOrders = response.data;
+  return allOrders.filter((o: any) => o.status === 'Recibida' || o.status === 'En diagnóstico');
+};
+
+export const startDiagnosis = async (id: number): Promise<void> => {
+  await api.put(`/Order/${id}/start-diagnosis`);
+};
+
+export const saveDiagnosisAndBudget = async (id: number, data: UpdateDiagnosisDto) => {
+  const response = await api.put(`/Order/${id}/diagnosis`, data);
+  return response.data;
+};
