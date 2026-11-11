@@ -71,4 +71,28 @@ public class OrderRepository : IOrderRepository
             .Include(o => o.client)
             .FirstOrDefaultAsync(o => o.id == id);
     }
+
+    /// <summary>
+    /// Changes the status only if the order still has the status that was read, and records
+    /// the event in the log. Returns false when another request changed the order first.
+    /// </summary>
+    public async Task<bool> ChangeStatusAsync(Order order, string newStatus, OrderLog log)
+    {
+        using var transaction = await _context.Database.BeginTransactionAsync();
+
+        var updatedRows = await _context.Orders
+            .Where(o => o.id == order.id && o.status == order.status)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(o => o.status, newStatus));
+
+        if (updatedRows == 0)
+            return false;
+
+        log.orderId = order.id;
+        await _context.Loggers.AddAsync(log);
+        await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
+
+        await _context.Entry(order).ReloadAsync();
+        return true;
+    }
 }

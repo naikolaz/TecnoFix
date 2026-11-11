@@ -16,3 +16,16 @@ export const MENSAJES_LOGIN = {
   credencialesIncorrectas: LOGIN_MESSAGES.invalidCredentials,
   sinConexion: LOGIN_MESSAGES.networkError,
 } as const;
+
+export const BUDGET_MESSAGES = {
+  notAvailable: 'El presupuesto no está disponible para su aprobación',
+  noOrders: 'Aún no tienes órdenes de reparación registradas.',
+  approveConfirmTitle: '¿Está seguro de aprobar el presupuesto?',
+  approveConfirmText: 'La orden pasará al estado «En reparación». Esta decisión no se puede modificar.',
+  approveSuccess: 'Presupuesto aprobado. La orden pasó al estado «En reparación».',
+  rejectConfirmTitle: '¿Está seguro de rechazar el presupuesto?',
+  rejectConfirmText:
+    'La orden pasará al estado «Rechazada» y el equipo quedará disponible para retiro sin reparar. Esta decisión no se puede modificar.',
+  rejectSuccess: 'Presupuesto rechazado. El equipo queda disponible para retiro sin reparar.',
+  help: 'Al aprobar, la orden pasa a «En reparación». Al rechazar, pasa a «Rechazada» y el equipo queda disponible para retiro sin reparar. La decisión no se puede modificar.',
+} as const;

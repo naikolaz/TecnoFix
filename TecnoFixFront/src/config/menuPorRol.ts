@@ -86,8 +86,8 @@ export const MENU_BY_ROLE: Record<Role, MenuItem[]> = {
       descripcion: 'Revisa el estado y el presupuesto de tus equipos.',
       route: '/mis-ordenes',
       ruta: '/mis-ordenes',
-      isAvailable: false,
-      disponible: false,
+      isAvailable: true,
+      disponible: true,
     },
   ],
 }
