@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import MensajeError from '../components/MensajeError'
 import Tooltip from '../components/Tooltip'
 import { BUDGET_MESSAGES } from '../config/constantes'
 import type { ClientOrder } from '../interfaces/ClientOrder'
@@ -29,6 +28,21 @@ const DECISIONS = {
 } as const
 
 const SINGLE_COLUMN_QUERY = '(max-width: 800px)'
+
+interface OrderAlertProps {
+  type: 'success' | 'error'
+  message: string
+}
+
+function OrderAlert({ type, message }: OrderAlertProps) {
+  if (!message) return null
+
+  return (
+    <p className={`order-alert order-alert--${type}`} role={type === 'error' ? 'alert' : 'status'}>
+      {message}
+    </p>
+  )
+}
 
 const getDeviceName = (order: ClientOrder): string => `${order.deviceType} · ${order.brandAndModel}`
 
@@ -122,7 +136,7 @@ function MyOrdersPage() {
       <h1>Mis órdenes</h1>
       <p className="texto-suave">Seleccione una orden para revisar el presupuesto.</p>
 
-      <MensajeError message={loadError} />
+      <OrderAlert type="error" message={loadError} />
 
       {!loadError && orders.length === 0 && <p className="my-orders__empty">{BUDGET_MESSAGES.noOrders}</p>}
 
@@ -234,19 +248,15 @@ function MyOrdersPage() {
                       {decisionInProgress === 'approve' ? 'Aprobando…' : 'Aprobar presupuesto'}
                     </button>
                   </div>
-                  <MensajeError message={decisionError} />
+                  <OrderAlert type="error" message={decisionError} />
                 </>
               )}
 
               {!selectedOrder.canDecideBudget && !successMessage && (
-                <MensajeError message={BUDGET_MESSAGES.notAvailable} />
+                <OrderAlert type="error" message={BUDGET_MESSAGES.notAvailable} />
               )}
 
-              {successMessage && (
-                <p className="order-detail__success" role="status">
-                  {successMessage}
-                </p>
-              )}
+              <OrderAlert type="success" message={successMessage} />
             </article>
           )}
         </div>

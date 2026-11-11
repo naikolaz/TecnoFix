@@ -209,12 +209,22 @@
   background: var(--color-fondo);
 }
 
-.order-detail__success {
+.order-alert {
   margin: 0;
-  background: #d4edda;
-  color: #155724;
   padding: 10px 14px;
   border-radius: 8px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.order-alert--success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.order-alert--error {
+  background: #fdecea;
+  color: var(--color-error);
 }
 
 @media (max-width: 800px) {
