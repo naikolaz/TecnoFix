@@ -10,35 +10,14 @@ namespace TecnoFixBack.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Orders_Users_ClientId",
-                table: "Orders");
-
-            migrationBuilder.DropIndex(
-                name: "IX_Orders_ClientId",
-                table: "Orders");
-
-            migrationBuilder.DropColumn(
-                name: "ClientId",
-                table: "Orders");
-
-            migrationBuilder.AddColumn<string>(
-                name: "diagnosis",
-                table: "Orders",
-                type: "text",
-                nullable: true);
-
-            migrationBuilder.AddColumn<decimal>(
-                name: "laborCost",
-                table: "Orders",
-                type: "numeric",
-                nullable: true);
-
-            migrationBuilder.AddColumn<decimal>(
-                name: "partsCost",
-                table: "Orders",
-                type: "numeric",
-                nullable: true);
+            migrationBuilder.Sql("""
+                ALTER TABLE "Orders" DROP CONSTRAINT IF EXISTS "FK_Orders_Users_ClientId";
+                DROP INDEX IF EXISTS "IX_Orders_ClientId";
+                ALTER TABLE "Orders" DROP COLUMN IF EXISTS "ClientId";
+                ALTER TABLE "Orders" ADD COLUMN IF NOT EXISTS "diagnosis" text;
+                ALTER TABLE "Orders" ADD COLUMN IF NOT EXISTS "laborCost" numeric;
+                ALTER TABLE "Orders" ADD COLUMN IF NOT EXISTS "partsCost" numeric;
+                """);
         }
 
         /// <inheritdoc />
