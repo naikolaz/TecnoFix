@@ -43,4 +43,5 @@ public class Order
     public decimal? partsCost { get; set; }
 
     public List<OrderLog> history { get; set; } = new List<OrderLog>();
+    public decimal? totalCost { get; set; }
 }

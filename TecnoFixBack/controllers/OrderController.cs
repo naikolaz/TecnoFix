@@ -61,4 +61,45 @@ public class OrderController : ControllerBase
             return StatusCode(500, new { message = "Error interno al crear la orden.", detail = ex.Message });
         }
     }
+
+    // PUT: api/Order/{id}/start-diagnosis
+    [HttpPut("{id:int}/start-diagnosis")]
+    public async Task<IActionResult> StartDiagnosis(int id)
+    {
+        // Extraer el ID del técnico autenticado desde el token JWT (si lo usas)
+        // int technicianId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+        int technicianId = 1; // HARDCODEADO por ahora, ajusta a tu lógica de Auth
+
+        var success = await _orderService.StartDiagnosisAsync(id, technicianId);
+        
+        if (!success)
+            return BadRequest(new { message = "No se pudo iniciar el diagnóstico. Verifique que la orden exista y esté en estado 'Recibida'." });
+
+        return Ok(new { message = "Orden en diagnóstico." });
+    }
+
+    // PUT: api/Order/{id}/diagnosis
+    [HttpPut("{id:int}/diagnosis")]
+    public async Task<IActionResult> SaveDiagnosis(int id, [FromBody] UpdateDiagnosisDto dto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        // int technicianId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
+        int technicianId = 1; // HARDCODEADO temporalmente
+
+        try
+        {
+            var result = await _orderService.SaveDiagnosisAndBudgetAsync(id, dto, technicianId);
+            return Ok(result);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Error interno al guardar el diagnóstico.", detail = ex.Message });
+        }
+    }
 }

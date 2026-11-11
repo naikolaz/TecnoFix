@@ -148,8 +148,17 @@ namespace TecnoFixBack.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("technicalDiagnosis")
+                        .HasColumnType("text");
+
+<<<<<<< HEAD
+                    b.Property<decimal?>("totalCost")
+                        .HasColumnType("numeric");
+
                     b.HasKey("id");
 
+=======
+>>>>>>> main
                     b.HasIndex("clientId");
 
                     b.ToTable("Orders");

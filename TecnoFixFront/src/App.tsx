@@ -5,8 +5,9 @@ import InicioPage from './pages/InicioPage'
 import LoginPage from './pages/LoginPage'
 import RegistroCliente from './components/RegistroCliente';
 import RegistrarTecnicoPage from './pages/RegistrarTecnicoPage';
-import { RegistrarOrdenPage } from './pages/RegistrarOrderPage';
 import MyOrdersPage from './pages/MyOrdersPage'
+import { RegistrarOrdenPage } from './pages/RegistrarOrderPage';
+import { DiagnosticoOrderPage } from './pages/DiagnosticoOrderPage';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
       <Route element={<RutaProtegida rolesPermitidos={['Administrador', 'Técnico']} />}>
         <Route element={<Layout />}>
           <Route path="/ordenes/nueva" element={<RegistrarOrdenPage />} />
+          <Route path="/ordenes/diagnostico" element={<DiagnosticoOrderPage />} />
         </Route>
       </Route>
 
