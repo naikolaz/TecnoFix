@@ -19,9 +19,6 @@ public class ClientOrderService : IClientOrderService
         _orderRepository = orderRepository;
     }
 
-    /// <summary>
-    /// ORD-003: lists the orders of the authenticated client, newest first.
-    /// </summary>
     public async Task<IEnumerable<ClientOrderDto>> GetOrdersAsync(int clientId)
     {
         var orders = await _orderRepository.GetByClientIdAsync(clientId);
@@ -44,10 +41,6 @@ public class ClientOrderService : IClientOrderService
         return DecideBudgetAsync(orderId, clientId, OrderStatus.Rejected, RejectedAction);
     }
 
-    /// <summary>
-    /// ORD-003: applies the client's decision. Only the owner can decide and only while the
-    /// order is «Presupuestada», so a decision already taken cannot be changed.
-    /// </summary>
     private async Task<ClientOrderDto> DecideBudgetAsync(int orderId, int clientId, string newStatus, string action)
     {
         var order = await GetOwnedOrderAsync(orderId, clientId);
