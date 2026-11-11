@@ -65,13 +65,13 @@ function LoginPage() {
       <section className="login__marca">
         <Logo tamano={56} claro />
         <h1>Servicio técnico de equipos electrónicos y computacionales</h1>
-        <p>Revisa en línea el estado de tus reparaciones, desde la recepción hasta la entrega.</p>
+        <p>Revise en línea el estado de sus reparaciones, desde la recepción hasta la entrega.</p>
       </section>
 
       <section className="login__panel">
         <form className="login__tarjeta" onSubmit={handleSubmit} noValidate>
           <h2>Iniciar sesión</h2>
-          <p className="login__subtitulo">Ingresa con tu correo electrónico y contraseña.</p>
+          <p className="login__subtitulo">Ingrese con su correo electrónico y contraseña.</p>
 
           <CampoFormulario
             id="email"
@@ -79,7 +79,7 @@ function LoginPage() {
             type="email"
             autoComplete="email"
             placeholder="usuario@correo.cl"
-            ayuda="Usa el correo con el que te registraste en TecnoFix, por ejemplo usuario@correo.cl."
+            ayuda="Use el correo con el que se registró en TecnoFix, por ejemplo usuario@correo.cl."
             value={email}
             error={errors.email}
             onChange={(e) => setEmail(e.target.value)}
@@ -91,7 +91,7 @@ function LoginPage() {
             type={showPassword ? 'text' : 'password'}
             autoComplete="current-password"
             placeholder="••••••••"
-            ayuda="Si eres nuevo, usa la contraseña temporal que te llegó por correo al registrarte."
+            ayuda="Si es nuevo, use la contraseña temporal que recibió por correo al registrarse."
             value={password}
             error={errors.password}
             onChange={(e) => setPassword(e.target.value)}
@@ -114,7 +114,7 @@ function LoginPage() {
           </button>
 
           <p className="login__registro">
-            ¿Eres cliente nuevo? <Link to="/registro">Regístrate aquí</Link>
+            ¿Es cliente nuevo? <Link to="/registro">Regístrese aquí</Link>
           </p>
         </form>
       </section>

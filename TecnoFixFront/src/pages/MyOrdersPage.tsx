@@ -120,7 +120,7 @@ function MyOrdersPage() {
   return (
     <section className="my-orders">
       <h1>Mis órdenes</h1>
-      <p className="texto-suave">Selecciona una orden para revisar su presupuesto.</p>
+      <p className="texto-suave">Seleccione una orden para revisar el presupuesto.</p>
 
       <MensajeError message={loadError} />
 
