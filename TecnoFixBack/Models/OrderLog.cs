@@ -21,4 +21,11 @@ public class OrderLog
 
     [Required]
     public DateTime date { get; set; } = DateTime.UtcNow;
+
+    public string? newStatus { get; set; }
+
+    public int? userId { get; set; }
+
+    [ForeignKey("userId")]
+    public User? user { get; set; }
 }

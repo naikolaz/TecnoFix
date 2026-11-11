@@ -50,7 +50,9 @@ public class ClientOrderService : IClientOrderService
 
         var decisionLog = new OrderLog
         {
-            action = $"{action} - Estado: {newStatus}",
+            action = action,
+            newStatus = newStatus,
+            userId = clientId,
             date = DateTime.UtcNow
         };
 

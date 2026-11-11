@@ -148,9 +148,6 @@ namespace TecnoFixBack.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("technicalDiagnosis")
-                        .HasColumnType("text");
-
                     b.Property<decimal?>("totalCost")
                         .HasColumnType("numeric");
 
@@ -176,12 +173,20 @@ namespace TecnoFixBack.Migrations
                     b.Property<DateTime>("date")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("newStatus")
+                        .HasColumnType("text");
+
                     b.Property<int>("orderId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("userId")
                         .HasColumnType("integer");
 
                     b.HasKey("id");
 
                     b.HasIndex("orderId");
+
+                    b.HasIndex("userId");
 
                     b.ToTable("Loggers");
                 });
@@ -311,7 +316,13 @@ namespace TecnoFixBack.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("TecnoFixBack.Models.User", "user")
+                        .WithMany()
+                        .HasForeignKey("userId");
+
                     b.Navigation("order");
+
+                    b.Navigation("user");
                 });
 
             modelBuilder.Entity("TecnoFixBack.Models.User", b =>

@@ -19,7 +19,7 @@ export const MENSAJES_LOGIN = {
 
 export const BUDGET_MESSAGES = {
   notAvailable: 'El presupuesto no está disponible para su aprobación',
-  noOrders: 'Aún no tienes órdenes de reparación registradas.',
+  noOrders: 'Aún no tiene órdenes de reparación registradas.',
   approveConfirmTitle: '¿Está seguro de aprobar el presupuesto?',
   approveConfirmText: 'La orden pasará al estado «En reparación». Esta decisión no se puede modificar.',
   approveSuccess: 'Presupuesto aprobado. La orden pasó al estado «En reparación».',
