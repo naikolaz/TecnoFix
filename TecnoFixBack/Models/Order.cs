@@ -37,4 +37,9 @@ public class Order
     public DateTime createdAt { get; set; } = DateTime.UtcNow;
 
     public List<OrderLog> history { get; set; } = new List<OrderLog>();
+
+    public string? technicalDiagnosis { get; set; }
+    public decimal? laborCost { get; set; }
+    public decimal? partsCost { get; set; }
+    public decimal? totalCost { get; set; }
 }

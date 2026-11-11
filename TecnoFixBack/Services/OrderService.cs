@@ -138,4 +138,59 @@ public class OrderService : IOrderService
             CreatedAt = order.createdAt
         };
     }
+
+    public async Task<bool> StartDiagnosisAsync(int orderId, int technicianId)
+    {
+        var order = await _context.Orders.FindAsync(orderId);
+        
+        if (order == null || order.status != "Recibida")
+        {
+            return false; // Solo puede pasar a En diagnóstico si está Recibida
+        }
+
+        order.status = "En diagnóstico";
+
+        var log = new OrderLog
+        {
+            orderId = order.id,
+            action = "Inicio de diagnóstico técnico",
+            date = DateTime.UtcNow
+        };
+
+        _context.Loggers.Add(log);
+        await _context.SaveChangesAsync();
+
+        return true;
+    }
+
+    public async Task<OrderResponseDto?> SaveDiagnosisAndBudgetAsync(int orderId, UpdateDiagnosisDto dto, int technicianId)
+    {
+        var order = await _orderRepository.GetByIdAsync(orderId);
+        
+        if (order == null || (order.status != "Recibida" && order.status != "En diagnóstico"))
+        {
+            throw new ArgumentException("La orden debe estar 'Recibida' o 'En diagnóstico' para registrar presupuesto.");
+        }
+
+        // Registrar datos del diagnóstico
+        order.technicalDiagnosis = dto.TechnicalDiagnosis;
+        order.laborCost = dto.LaborCost;
+        order.partsCost = dto.PartsCost;
+        order.totalCost = dto.LaborCost + dto.PartsCost; // Cálculo del total (IVA incluido)
+        order.status = "Presupuestada";
+
+        // Registrar en bitácora
+        var log = new OrderLog
+        {
+            orderId = order.id,
+            action = $"Presupuesto generado. Total: {order.totalCost:C}",
+            date = DateTime.UtcNow
+        };
+
+        _context.Loggers.Add(log);
+        _context.Orders.Update(order);
+        await _context.SaveChangesAsync();
+
+        return MapToDto(order, order.client);
+    }
 }
