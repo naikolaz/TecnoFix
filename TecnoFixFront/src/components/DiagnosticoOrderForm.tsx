@@ -17,7 +17,7 @@ interface DiagnosisFormState {
   partsCost: string;
 }
 
-export default function DiagnosticoOrdenForm() {
+export default function DiagnosticoOrderForm() {
   const { isAuthenticated } = useAuth();
   
   const [ordersOptions, setOrdersOptions] = useState<OptionType[]>([]);
