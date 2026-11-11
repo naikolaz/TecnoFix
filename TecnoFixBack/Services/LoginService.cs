@@ -14,10 +14,6 @@ public class LoginService : ILoginService
         _tokenService = tokenService;
     }
 
-    /// <summary>
-    /// USU-001: Validates email and password against the database.
-    /// Returns null if user does not exist or password does not match.
-    /// </summary>
     public async Task<LoginResponseDto?> LoginAsync(LoginDto dto)
     {
         var user = await _userRepository.GetByEmailAsync(dto.Email);

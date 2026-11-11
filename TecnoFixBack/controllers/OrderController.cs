@@ -66,9 +66,8 @@ public class OrderController : ControllerBase
     [HttpPut("{id:int}/start-diagnosis")]
     public async Task<IActionResult> StartDiagnosis(int id)
     {
-        // Extraer el ID del técnico autenticado desde el token JWT (si lo usas)
-        // int technicianId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-        int technicianId = 1; // HARDCODEADO por ahora, ajusta a tu lógica de Auth
+
+        int technicianId = 1;
 
         var success = await _orderService.StartDiagnosisAsync(id, technicianId);
         
@@ -85,8 +84,7 @@ public class OrderController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        // int technicianId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "0");
-        int technicianId = 1; // HARDCODEADO temporalmente
+        int technicianId = 1;
 
         try
         {
