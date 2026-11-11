@@ -173,7 +173,7 @@ public class OrderService : IOrderService
         }
 
         // Registrar datos del diagnóstico
-        order.technicalDiagnosis = dto.TechnicalDiagnosis;
+        order.diagnosis = dto.TechnicalDiagnosis;
         order.laborCost = dto.LaborCost;
         order.partsCost = dto.PartsCost;
         order.totalCost = dto.LaborCost + dto.PartsCost; // Cálculo del total (IVA incluido)

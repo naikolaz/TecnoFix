@@ -38,7 +38,7 @@ public class Order
 
     public List<OrderLog> history { get; set; } = new List<OrderLog>();
 
-    public string? technicalDiagnosis { get; set; }
+    public string? diagnosis { get; set; }
     public decimal? laborCost { get; set; }
     public decimal? partsCost { get; set; }
     public decimal? totalCost { get; set; }
