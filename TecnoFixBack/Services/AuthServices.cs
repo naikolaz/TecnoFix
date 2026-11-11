@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 using TecnoFixBack.DTOs;
 using TecnoFixBack.Interfaces;
 using TecnoFixBack.Models;
@@ -23,27 +23,27 @@ public class AuthService : IAuthService
             string.IsNullOrWhiteSpace(dto.Rut) || 
             string.IsNullOrWhiteSpace(dto.Telefono))
         {
-            throw new Exception("All fields are required.");
+            throw new Exception("Todos los campos son obligatorios.");
         }
 
         if (!ValidateEmailFormat(dto.Email))
         {
-            throw new Exception("The email format is invalid.");
+            throw new Exception("El correo electrónico no tiene un formato válido.");
         }
 
         if (!ValidateRut(dto.Rut))
         {
-            throw new Exception("The entered RUT is invalid according to the Chilean algorithm.");
+            throw new Exception("El RUT ingresado no es válido.");
         }
 
         if (await _userRepository.EmailExistsAsync(dto.Email)) 
         {
-            throw new Exception("The entered email is already registered.");
+            throw new Exception("El correo electrónico ingresado ya se encuentra registrado.");
         }
         
         if (await _userRepository.RutExistsAsync(dto.Rut)) 
         {
-            throw new Exception("The entered RUT is already registered.");
+            throw new Exception("El RUT ingresado ya se encuentra registrado.");
         }
 
         string tempPassword = GenerateRandomPassword(8);
@@ -116,17 +116,17 @@ public class AuthService : IAuthService
         if (string.IsNullOrWhiteSpace(dto.NombreCompleto) || 
             string.IsNullOrWhiteSpace(dto.Email))
         {
-            throw new Exception("Name and email are required.");
+            throw new Exception("Nombre, correo y especialidad son obligatorios.");
         }
 
         if (!ValidateEmailFormat(dto.Email))
         {
-            throw new Exception("The email format is invalid.");
+            throw new Exception("El correo electrónico no tiene un formato válido.");
         }
 
         if (await _userRepository.EmailExistsAsync(dto.Email)) 
         {
-            throw new Exception("The entered email is already registered.");
+            throw new Exception("El correo electrónico ingresado ya se encuentra registrado.");
         }
 
         string tempPassword = GenerateRandomPassword(8);

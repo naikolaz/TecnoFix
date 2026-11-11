@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import Select from 'react-select';
 import { useAuth } from '../context/useAuth';
 import { getClients } from '../services/authService';
@@ -267,7 +267,7 @@ export default function RegistroOrdenForm() {
             styles={customSelectStyles}
           />
           {fieldErrors.client && (
-            <p style={{ color: '#d9534f', fontSize: '0.85rem', marginTop: '4px' }}>
+            <p style={{ color: '#f56558', fontSize: '0.85rem', marginTop: '4px' }}>
               {fieldErrors.client}
             </p>
           )}
@@ -291,7 +291,7 @@ export default function RegistroOrdenForm() {
                 width: '100%', 
                 padding: '10px', 
                 borderRadius: '8px', 
-                border: fieldErrors.deviceType ? '1.5px solid #d9534f' : '1px solid var(--color-borde, #ccc)' 
+                border: fieldErrors.deviceType ? '1.5px solid #f56558' : '1px solid var(--color-borde, #ccc)' 
               }}
             >
               <option value="">Seleccione tipo...</option>
@@ -304,7 +304,7 @@ export default function RegistroOrdenForm() {
               <option value="Otro">Otro</option>
             </select>
             {fieldErrors.deviceType && (
-              <p style={{ color: '#d9534f', fontSize: '0.85rem', marginTop: '4px' }}>
+              <p style={{ color: '#f56558', fontSize: '0.85rem', marginTop: '4px' }}>
                 {fieldErrors.deviceType}
               </p>
             )}
@@ -342,14 +342,14 @@ export default function RegistroOrdenForm() {
                   style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #ccc' }}
                 />
                 {matchingExistingBrand && (
-                  <p style={{ color: '#d9534f', fontSize: '0.85rem', marginTop: '6px' }}>
+                  <p style={{ color: '#f56558', fontSize: '0.85rem', marginTop: '6px' }}>
                     La marca "{formData.customBrand}" ya existe en el sistema. Considere seleccionarla de la lista.
                   </p>
                 )}
               </div>
             )}
             {fieldErrors.brandAndModel && (
-              <p style={{ color: '#d9534f', fontSize: '0.85rem', marginTop: '4px' }}>
+              <p style={{ color: '#f56558', fontSize: '0.85rem', marginTop: '4px' }}>
                 {fieldErrors.brandAndModel}
               </p>
             )}
@@ -430,12 +430,12 @@ export default function RegistroOrdenForm() {
               minHeight: '100px', 
               padding: '10px', 
               borderRadius: '8px', 
-              border: fieldErrors.issueDescription ? '1.5px solid #d9534f' : '1px solid var(--color-borde, #ccc)' 
+              border: fieldErrors.issueDescription ? '1.5px solid #f56558' : '1px solid var(--color-borde, #ccc)' 
             }}
             placeholder="Describe el problema reportado por el cliente..."
           />
           {fieldErrors.issueDescription && (
-            <p style={{ color: '#d9534f', fontSize: '0.85rem', marginTop: '4px' }}>
+            <p style={{ color: '#f56558', fontSize: '0.85rem', marginTop: '4px' }}>
               {fieldErrors.issueDescription}
             </p>
           )}

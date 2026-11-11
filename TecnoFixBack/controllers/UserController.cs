@@ -6,7 +6,7 @@ namespace TecnoFixBack.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
+[Authorize(Roles = "Administrador,Técnico")]
 public class UsersController : ControllerBase
 {
     private readonly IUserRepository _userRepository;

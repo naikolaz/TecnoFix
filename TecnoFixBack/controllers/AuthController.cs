@@ -64,7 +64,7 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(new { error = ex.Message });
+            return BadRequest(new { error = ex.Message, message = ex.Message });
         }
     }
     
@@ -82,12 +82,12 @@ public class AuthController : ControllerBase
         }
         catch (Exception ex)
         {
-            return BadRequest(new { error = ex.Message });
+            return BadRequest(new { error = ex.Message, message = ex.Message });
         }
     }
 
     [HttpGet("clientes")]
-    [Authorize]
+    [Authorize(Roles = "Administrador,Técnico")]
     public async Task<IActionResult> GetClients(CancellationToken cancellationToken)
     {
         try
