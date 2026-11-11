@@ -111,9 +111,6 @@ namespace TecnoFixBack.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("id"));
 
-                    b.Property<int?>("ClientId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("accessories")
                         .HasColumnType("text");
 
@@ -131,9 +128,18 @@ namespace TecnoFixBack.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("diagnosis")
+                        .HasColumnType("text");
+
                     b.Property<string>("issueDescription")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<decimal?>("laborCost")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal?>("partsCost")
+                        .HasColumnType("numeric");
 
                     b.Property<string>("serialNumber")
                         .HasColumnType("text");
@@ -143,8 +149,6 @@ namespace TecnoFixBack.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("id");
-
-                    b.HasIndex("ClientId");
 
                     b.HasIndex("clientId");
 
@@ -284,17 +288,11 @@ namespace TecnoFixBack.Migrations
 
             modelBuilder.Entity("TecnoFixBack.Models.Order", b =>
                 {
-                    b.HasOne("TecnoFixBack.Models.User", "Client")
-                        .WithMany()
-                        .HasForeignKey("ClientId");
-
                     b.HasOne("TecnoFixBack.Models.User", "client")
                         .WithMany()
                         .HasForeignKey("clientId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("Client");
 
                     b.Navigation("client");
                 });

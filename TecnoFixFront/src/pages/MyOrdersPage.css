@@ -1,0 +1,232 @@
+.my-orders h1 {
+  color: var(--color-primario);
+  margin: 0 0 4px;
+}
+
+.my-orders > .texto-suave {
+  margin: 0 0 20px;
+}
+
+.my-orders__empty {
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: 10px;
+  padding: 18px;
+  color: var(--color-texto-suave);
+}
+
+.my-orders__layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.my-orders__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.order-item {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-left: 5px solid var(--color-borde);
+  border-radius: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.order-item:hover {
+  box-shadow: 0 6px 16px rgba(6, 71, 137, 0.1);
+}
+
+.order-item:focus-visible {
+  outline: 3px solid rgba(66, 122, 161, 0.45);
+  outline-offset: 2px;
+}
+
+.order-item--selected {
+  border-color: var(--color-primario);
+  border-left-color: var(--color-primario);
+}
+
+.order-item__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--color-primario);
+}
+
+.order-item__issue {
+  color: var(--color-texto-suave);
+  font-size: 0.92rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.order-item__date {
+  color: var(--color-texto-suave);
+  font-size: 0.82rem;
+}
+
+.order-status {
+  flex-shrink: 0;
+  background: var(--color-fondo);
+  color: var(--color-primario);
+  border: 1px solid var(--color-borde);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 2px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.order-status--pending {
+  background: var(--color-primario);
+  border-color: var(--color-primario);
+  color: #ffffff;
+}
+
+.order-detail {
+  scroll-margin-top: 12px;
+  background: var(--color-superficie);
+  border-radius: 14px;
+  padding: 28px;
+  box-shadow: 0 10px 30px rgba(6, 71, 137, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.order-detail__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.order-detail__header h2,
+.order-detail__budget-title h3 {
+  margin: 0;
+  color: var(--color-primario);
+}
+
+.order-detail__data {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px 24px;
+}
+
+.order-detail__data dt,
+.budget__costs dt {
+  color: var(--color-texto-suave);
+  font-size: 0.85rem;
+}
+
+.order-detail__data dd,
+.budget__costs dd {
+  margin: 0;
+}
+
+.order-detail__budget-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid var(--color-borde);
+  padding-top: 18px;
+}
+
+.budget {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.budget__diagnosis {
+  margin: 0;
+}
+
+.budget__costs {
+  margin: 0;
+  background: var(--color-fondo);
+  border-radius: 10px;
+  padding: 6px 16px;
+}
+
+.budget__costs > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.budget__costs dt {
+  font-size: 0.95rem;
+}
+
+.budget__costs .budget__total {
+  border-top: 1px solid var(--color-borde);
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.budget__total dt {
+  color: var(--color-texto);
+  font-size: 1.1rem;
+}
+
+.order-detail__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.order-detail__reject {
+  background: var(--color-superficie);
+  color: var(--color-primario);
+  border-color: var(--color-primario);
+}
+
+.order-detail__reject:hover:not(:disabled) {
+  background: var(--color-fondo);
+}
+
+.order-detail__success {
+  margin: 0;
+  background: #d4edda;
+  color: #155724;
+  padding: 10px 14px;
+  border-radius: 8px;
+}
+
+@media (max-width: 800px) {
+  .my-orders__layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .order-detail {
+    padding: 20px;
+  }
+
+  .order-detail__actions .boton {
+    flex: 1 1 200px;
+  }
+}

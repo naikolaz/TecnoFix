@@ -6,6 +6,7 @@ import LoginPage from './pages/LoginPage'
 import RegistroCliente from './components/RegistroCliente';
 import RegistrarTecnicoPage from './pages/RegistrarTecnicoPage';
 import { RegistrarOrdenPage } from './pages/RegistrarOrderPage';
+import MyOrdersPage from './pages/MyOrdersPage'
 
 function App() {
   return (
@@ -32,6 +33,13 @@ function App() {
       <Route element={<RutaProtegida rolesPermitidos={['Administrador']} />}>
         <Route element={<Layout />}>
           <Route path="/tecnicos/registrar" element={<RegistrarTecnicoPage />} />
+        </Route>
+      </Route>
+
+      {/* Rutas Exclusivas de Cliente */}
+      <Route element={<RutaProtegida rolesPermitidos={['Cliente']} />}>
+        <Route element={<Layout />}>
+          <Route path="/mis-ordenes" element={<MyOrdersPage />} />
         </Route>
       </Route>
 

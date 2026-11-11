@@ -9,4 +9,5 @@ public interface IOrderRepository
     Task<IEnumerable<Order>> GetAllAsync();
     Task<Order?> GetByIdAsync(int id);
     Task<IEnumerable<Order>> GetByClientIdAsync(int clientId);
+    Task<bool> ChangeStatusAsync(Order order, string newStatus, OrderLog log);
 }

@@ -26,3 +26,22 @@ Content-Type: application/json
   "issueDescription": "Pc se congela",
   "accessories": "Cargador original"
 }
+
+### ORD-003: los siguientes requests usan el token de un usuario con rol Cliente
+@clientToken = PEGAR_AQUI_EL_TOKEN_DE_UN_CLIENTE
+
+### Listar mis órdenes (ORD-003)
+GET {{host}}/api/ClientOrder
+Authorization: Bearer {{clientToken}}
+
+### Revisar una orden propia y su presupuesto (ORD-003)
+GET {{host}}/api/ClientOrder/1
+Authorization: Bearer {{clientToken}}
+
+### Aprobar presupuesto (ORD-003)
+POST {{host}}/api/ClientOrder/1/approve-budget
+Authorization: Bearer {{clientToken}}
+
+### Rechazar presupuesto (ORD-003)
+POST {{host}}/api/ClientOrder/1/reject-budget
+Authorization: Bearer {{clientToken}}

@@ -36,5 +36,11 @@ public class Order
     [Required]
     public DateTime createdAt { get; set; } = DateTime.UtcNow;
 
+    public string? diagnosis { get; set; }
+
+    public decimal? laborCost { get; set; }
+
+    public decimal? partsCost { get; set; }
+
     public List<OrderLog> history { get; set; } = new List<OrderLog>();
 }
