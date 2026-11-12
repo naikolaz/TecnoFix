@@ -141,114 +141,121 @@ export default function DiagnosticoOrderForm() {
   const currentTotal = (parseFloat(formData.laborCost) || 0) + (parseFloat(formData.partsCost) || 0);
 
   return (
-    <div style={{ background: 'var(--color-superficie, #fff)', padding: '32px', borderRadius: '12px', border: '1px solid var(--color-borde, #ccc)', maxWidth: '900px', margin: '32px auto' }}>
-      <h2>Registrar Diagnóstico y Presupuesto (ORD-002)</h2>
+    <div style={{ position: 'relative', background: 'var(--color-superficie, #fff)', borderRadius: '14px', boxShadow: '0 10px 30px rgba(6, 71, 137, 0.12)', maxWidth: '900px', margin: '32px auto', overflow: 'hidden' }}>
       
-      {!isDiagnosing ? (
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>
-            Seleccionar Orden (Recibida o En diagnóstico) *
-          </label>
-          <Select
-            options={ordersOptions}
-            value={selectedOrder}
-            onChange={(option) => setSelectedOrder(option)}
-            placeholder="Buscar orden por número o modelo..."
-            noOptionsMessage={() => "No hay órdenes pendientes de diagnóstico"}
-            isClearable
-            isSearchable
-          />
-          <button 
-            onClick={handleStartDiagnosis}
-            disabled={!selectedOrder || isLoading}
-            className="boton boton--primario"
-            style={{ marginTop: '20px', padding: '12px', width: '100%', cursor: (!selectedOrder || isLoading) ? 'not-allowed' : 'pointer' }}
-          >
-            {isLoading ? 'Cargando...' : 'Abrir Orden para Diagnosticar'}
-          </button>
-        </div>
-      ) : (
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} noValidate>
-          <div style={{ padding: '15px', backgroundColor: '#f8f9fa', borderRadius: '8px', border: '1px solid #dee2e6' }}>
-            <strong>Orden seleccionada:</strong> {selectedOrder?.label} <br/>
-            <strong>Falla reportada:</strong> {selectedOrder?.order.issueDescription}
-          </div>
-
-          <div className="campo">
+      {/* Borde superior con degradado */}
+      <div style={{ height: '6px', width: '100%', background: 'linear-gradient(160deg, var(--color-primario, #064789) 0%, var(--color-secundario, #2563eb) 100%)' }} />
+      
+      <div style={{ padding: '32px 36px' }}>
+        {/* Título en azul */}
+        <h2 style={{ color: 'var(--color-primario, #064789)', margin: '0 0 8px 0', fontSize: '1.6rem' }}>Registrar Diagnóstico y Presupuesto</h2>
+        
+        {!isDiagnosing ? (
+          <div style={{ marginBottom: '20px', marginTop: '16px' }}>
             <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>
-              Diagnóstico técnico *
+              Seleccionar Orden (Recibida o En diagnóstico) *
             </label>
-            <textarea
-              value={formData.technicalDiagnosis}
-              onChange={(e) => setFormData(prev => ({ ...prev, technicalDiagnosis: e.target.value }))}
-              style={{ width: '100%', minHeight: '100px', padding: '10px', borderRadius: '8px', border: '1px solid var(--color-borde, #ccc)' }}
-              placeholder="Describa el diagnóstico realizado..."
+            <Select
+              options={ordersOptions}
+              value={selectedOrder}
+              onChange={(option) => setSelectedOrder(option)}
+              placeholder="Buscar orden por número o modelo..."
+              noOptionsMessage={() => "No hay órdenes pendientes de diagnóstico"}
+              isClearable
+              isSearchable
             />
-          </div>
-
-          <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
-            <div className="campo" style={{ flex: '1 1 200px' }}>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>
-                Costo mano de obra ($) *
-              </label>
-              <input
-                type="number"
-                min="0"
-                value={formData.laborCost}
-                onChange={(e) => setFormData(prev => ({ ...prev, laborCost: e.target.value }))}
-                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ccc' }}
-              />
-            </div>
-
-            <div className="campo" style={{ flex: '1 1 200px' }}>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>
-                Costo repuestos ($) *
-              </label>
-              <input
-                type="number"
-                min="0"
-                value={formData.partsCost}
-                onChange={(e) => setFormData(prev => ({ ...prev, partsCost: e.target.value }))}
-                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ccc' }}
-              />
-            </div>
-
-            <div className="campo" style={{ flex: '1 1 200px' }}>
-              <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px', color: '#0056b3' }}>
-                Costo Total (Valores finales con impuestos)
-              </label>
-              <input
-                type="text"
-                readOnly
-                value={`$ ${currentTotal.toLocaleString('es-CL')}`}
-                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #0056b3', backgroundColor: '#e9f2fb', fontWeight: 'bold' }}
-              />
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
             <button 
-              type="button" 
-              onClick={() => {
-                setIsDiagnosing(false);
-                setSelectedOrder(null);
-              }}
-              className="boton boton--secundario"
-              style={{ padding: '14px', flex: '1' }}
+              onClick={handleStartDiagnosis}
+              disabled={!selectedOrder || isLoading}
+              className="boton boton--primario"
+              style={{ marginTop: '20px', padding: '12px', width: '100%', cursor: (!selectedOrder || isLoading) ? 'not-allowed' : 'pointer' }}
             >
-              Cancelar
-            </button>
-            <button 
-              type="submit" 
-              disabled={isLoading}
-              className="boton boton--primario" 
-              style={{ padding: '14px', flex: '2', cursor: isLoading ? 'not-allowed' : 'pointer' }}
-            >
-              {isLoading ? 'Guardando...' : 'Registrar Presupuesto'}
+              {isLoading ? 'Cargando...' : 'Abrir Orden para Diagnosticar'}
             </button>
           </div>
-        </form>
-      )}
+        ) : (
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '16px' }} noValidate>
+            <div style={{ padding: '15px', backgroundColor: '#f8f9fa', borderRadius: '8px', border: '1px solid #dee2e6' }}>
+              <strong>Orden seleccionada:</strong> {selectedOrder?.label} <br/>
+              <strong>Falla reportada:</strong> {selectedOrder?.order.issueDescription}
+            </div>
+
+            <div className="campo">
+              <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>
+                Diagnóstico técnico *
+              </label>
+              <textarea
+                value={formData.technicalDiagnosis}
+                onChange={(e) => setFormData(prev => ({ ...prev, technicalDiagnosis: e.target.value }))}
+                style={{ width: '100%', minHeight: '100px', padding: '10px', borderRadius: '8px', border: '1px solid var(--color-borde, #ccc)' }}
+                placeholder="Describa el diagnóstico realizado..."
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+              <div className="campo" style={{ flex: '1 1 200px' }}>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>
+                  Costo mano de obra ($) *
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={formData.laborCost}
+                  onChange={(e) => setFormData(prev => ({ ...prev, laborCost: e.target.value }))}
+                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ccc' }}
+                />
+              </div>
+
+              <div className="campo" style={{ flex: '1 1 200px' }}>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>
+                  Costo repuestos ($) *
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={formData.partsCost}
+                  onChange={(e) => setFormData(prev => ({ ...prev, partsCost: e.target.value }))}
+                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ccc' }}
+                />
+              </div>
+
+              <div className="campo" style={{ flex: '1 1 200px' }}>
+                <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px', color: '#0056b3' }}>
+                  Costo Total (Valores finales)
+                </label>
+                <input
+                  type="text"
+                  readOnly
+                  value={`$ ${currentTotal.toLocaleString('es-CL')}`}
+                  style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #0056b3', backgroundColor: '#e9f2fb', fontWeight: 'bold' }}
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '15px', marginTop: '10px' }}>
+              <button 
+                type="button" 
+                onClick={() => {
+                  setIsDiagnosing(false);
+                  setSelectedOrder(null);
+                }}
+                className="boton boton--secundario"
+                style={{ padding: '14px', flex: '1' }}
+              >
+                Cancelar
+              </button>
+              <button 
+                type="submit" 
+                disabled={isLoading}
+                className="boton boton--primario" 
+                style={{ padding: '14px', flex: '2', cursor: isLoading ? 'not-allowed' : 'pointer' }}
+              >
+                {isLoading ? 'Guardando...' : 'Registrar Presupuesto'}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
     </div>
   );
 }

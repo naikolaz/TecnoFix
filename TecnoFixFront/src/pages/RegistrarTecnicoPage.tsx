@@ -46,36 +46,20 @@ export const RegistrarTecnicoPage = () => {
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', padding: '2rem 1rem' }}>
-      {/* TARJETA BLANCA ESTILO ORD-001/002 */}
-      <div style={{ 
-        background: 'var(--color-superficie, #ffffff)', 
-        borderRadius: '12px', 
-        padding: '36px',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)', 
-        width: '100%', 
-        maxWidth: '500px',
-      }}>
-        
-        {/* CABECERA CON TEXTO EN DEGRADADO Y ESTILO LIMPIO */}
-        <div style={{ marginBottom: '24px' }}>
-          <h2 style={{ 
-            margin: '0 0 8px 0', 
-            fontSize: '1.5rem',
-            background: 'linear-gradient(160deg, var(--color-primario) 0%, var(--color-secundario) 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            display: 'inline-block'
-          }}>
-            Registro de técnico
-          </h2>
-          <p style={{ margin: 0, color: 'var(--color-texto-suave, #666)', fontSize: '0.95rem' }}>
-            Añade nuevos especialistas al sistema para que puedan diagnosticar reparaciones.
-          </p>
-        </div>
+    /* CONTENEDOR CON SOMBRA Y BORDE SUPERIOR DEGRADADO */
+    <div style={{ position: 'relative', background: 'var(--color-superficie, #fff)', borderRadius: '14px', boxShadow: '0 10px 30px rgba(6, 71, 137, 0.12)', maxWidth: '900px', margin: '32px auto', overflow: 'hidden' }}>
+      
+      {/* LÍNEA SUPERIOR CON DEGRADADO */}
+      <div style={{ height: '6px', width: '100%', background: 'linear-gradient(160deg, var(--color-primario, #064789) 0%, var(--color-secundario, #2563eb) 100%)' }} />
+      
+      <div style={{ padding: '32px 36px' }}>
+        {/* TÍTULO EN AZUL EXACTO AL DE LAS ÓRDENES */}
+        <h2 style={{ color: 'var(--color-primario, #064789)', margin: '0 0 8px 0', fontSize: '1.6rem' }}>Registrar Técnico</h2>
+        <p style={{ color: 'var(--color-texto-suave, #666)', marginBottom: '24px' }}>
+          Añade nuevos especialistas al sistema para que puedan diagnosticar reparaciones. Los campos con (*) son obligatorios.
+        </p>
 
-        {/* CUERPO DEL FORMULARIO */}
-        <form onSubmit={handleSubmit} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} noValidate>
           
           <CampoFormulario
             id="nombre"
@@ -111,7 +95,17 @@ export const RegistrarTecnicoPage = () => {
             </div>
           )}
           
-          <button type="submit" className="boton boton--primario boton--bloque" disabled={isLoading} style={{ marginTop: '8px' }}>
+          <button 
+            type="submit" 
+            disabled={isLoading}
+            className="boton boton--primario" 
+            style={{ 
+              padding: '14px', 
+              fontSize: '1.1rem',
+              cursor: isLoading ? 'not-allowed' : 'pointer',
+              opacity: isLoading ? 0.7 : 1 
+            }}
+          >
             {isLoading ? 'Registrando...' : 'Registrar Técnico'}
           </button>
         </form>
