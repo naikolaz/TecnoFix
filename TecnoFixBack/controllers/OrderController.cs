@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 using TecnoFixBack.DTOs;
 using TecnoFixBack.Interfaces;
 
@@ -64,10 +65,15 @@ public class OrderController : ControllerBase
 
     // PUT: api/Order/{id}/start-diagnosis
     [HttpPut("{id:int}/start-diagnosis")]
+    [Authorize(Roles = "Técnico")]
     public async Task<IActionResult> StartDiagnosis(int id)
     {
 
-        int technicianId = 1;
+        var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("id")?.Value;
+        if (!int.TryParse(userIdString, out int technicianId))
+        {
+            return Unauthorized(new { message = "Token inválido o sin ID de usuario." });
+        }
 
         var success = await _orderService.StartDiagnosisAsync(id, technicianId);
         
@@ -79,12 +85,17 @@ public class OrderController : ControllerBase
 
     // PUT: api/Order/{id}/diagnosis
     [HttpPut("{id:int}/diagnosis")]
+    [Authorize(Roles = "Técnico")]
     public async Task<IActionResult> SaveDiagnosis(int id, [FromBody] UpdateDiagnosisDto dto)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        int technicianId = 1;
+        var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("id")?.Value;
+        if (!int.TryParse(userIdString, out int technicianId))
+        {
+            return Unauthorized(new { message = "Token inválido o sin ID de usuario." });
+        }
 
         try
         {

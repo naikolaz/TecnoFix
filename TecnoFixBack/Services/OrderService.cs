@@ -183,7 +183,7 @@ public class OrderService : IOrderService
         var log = new OrderLog
         {
             orderId = order.id,
-            action = $"Presupuesto generado. Total: {order.totalCost:C}",
+            action = $"Presupuesto generado. Total: {order.totalCost}",
             date = DateTime.UtcNow
         };
 
