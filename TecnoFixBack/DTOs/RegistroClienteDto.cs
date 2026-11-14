@@ -5,6 +5,7 @@ namespace TecnoFixBack.DTOs;
 public class RegistroClienteDto
 {
     [Required(ErrorMessage = "Debe completar el campo Nombre y apellidos")]
+    [MaxLength(100, ErrorMessage = "El campo Nombre y apellidos no puede superar los 100 caracteres")]
     public string NombreCompleto { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Debe completar el campo Correo electrónico")]
@@ -12,7 +13,7 @@ public class RegistroClienteDto
     public string Email { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Debe completar el campo RUT")]
-    [RegularExpression(@"^[0-9]+[0-9Kk]$", ErrorMessage = "El RUT debe ingresarse sin puntos ni guion (ej.: 12345670K)")]
+    [RegularExpression(@"^[0-9]{7,8}[0-9Kk]$", ErrorMessage = "El RUT debe ingresarse sin puntos ni guion (ej.: 12345670K)")]
     public string Rut { get; set; } = string.Empty;
 
    [Required(ErrorMessage = "Debe completar el campo Teléfono de contacto")]

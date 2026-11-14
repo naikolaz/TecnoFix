@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Net;
+using System.Text.RegularExpressions;
 using TecnoFixBack.DTOs;
 using TecnoFixBack.Interfaces;
 using TecnoFixBack.Models;
@@ -25,6 +26,10 @@ public class AuthService : IAuthService
         {
             throw new Exception("Todos los campos son obligatorios.");
         }
+
+        // Normalize the RUT before validating existence and persisting it,
+        // so the same RUT cannot be registered twice by changing letter case.
+        dto.Rut = dto.Rut.Trim().ToUpper();
 
         if (!ValidateEmailFormat(dto.Email))
         {
@@ -85,7 +90,7 @@ public class AuthService : IAuthService
                         <h1>Sistema TecnoFix</h1>
                     </div>
                     <div class='body'>
-                        <p>Hola <strong>{newClient.name}</strong>,</p>
+                        <p>Hola <strong>{WebUtility.HtmlEncode(newClient.name)}</strong>,</p>
                         <p>Tu cuenta de cliente ha sido registrada exitosamente en nuestra plataforma de soporte técnico.</p>
                         <p>A continuación se detalla tu contraseña temporal de acceso:</p>
                         <div class='password-box'>
@@ -168,8 +173,8 @@ public class AuthService : IAuthService
                         <h1>Panel Técnico - TecnoFix</h1>
                     </div>
                     <div class='body'>
-                        <p>Hola <strong>{newTechnician.name}</strong>,</p>
-                        <p>Se ha creado tu perfil de técnico especializado <span class='badge'>{newTechnician.specialization ?? "General"}</span> en el sistema.</p>
+                        <p>Hola <strong>{WebUtility.HtmlEncode(newTechnician.name)}</strong>,</p>
+                        <p>Se ha creado tu perfil de técnico especializado <span class='badge'>{WebUtility.HtmlEncode(newTechnician.specialization ?? "General")}</span> en el sistema.</p>
                         <p>Tus credenciales para ingresar al panel son las siguientes:</p>
                         <div class='password-box'>
                             {tempPassword}

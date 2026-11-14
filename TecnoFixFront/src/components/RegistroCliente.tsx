@@ -43,18 +43,22 @@ export default function RegistroCliente() {
       errors.email = 'El correo electrónico no tiene un formato válido';
     }
 
-    const cleanRut = formData.rut.replace(/[^0-9kK]/g, '').toUpperCase();
+    const rut = formData.rut.trim();
 
-    if (!formData.rut.trim()) {
+    if (!rut) {
       errors.rut = 'Debe completar el campo RUT';
-    } else if (cleanRut.length < 8 || cleanRut.length > 9) {
-      errors.rut = 'El RUT ingresado no es válido (ej: 12345678K o 12345678-k)';
+    } else if (/[.-]/.test(rut)) {
+      errors.rut = 'El RUT debe ingresarse sin puntos ni guion (ej.: 12345670K)';
+    } else if (!/^[0-9]{7,8}[0-9Kk]$/.test(rut)) {
+      errors.rut = 'El RUT ingresado no es válido (ej.: 12345670K)';
     }
 
-    if (!formData.telefono.trim()) {
+    const telefono = formData.telefono.trim();
+
+    if (!telefono) {
       errors.telefono = 'Debe completar el campo Teléfono de contacto';
-    } else if (!/^\+?\d{9,12}$/.test(formData.telefono.replace(/\s/g, ''))) {
-      errors.telefono = 'El teléfono debe tener un formato válido (ej: +56912345678)';
+    } else if (!/^\+569\d{8}$/.test(telefono)) {
+      errors.telefono = 'El teléfono debe tener el formato +569XXXXXXXX (ej.: +56912345678)';
     }
 
     setFieldErrors(errors);
@@ -78,11 +82,12 @@ export default function RegistroCliente() {
 
     setIsLoading(true);
     try {
-      const formattedRut = formData.rut.replace(/[^0-9kK]/g, '').toUpperCase();
-
       await api.post('/auth/registrar-cliente', {
         ...formData,
-        rut: formattedRut
+        nombreCompleto: formData.nombreCompleto.trim(),
+        email: formData.email.trim(),
+        rut: formData.rut.trim().toUpperCase(),
+        telefono: formData.telefono.trim()
       });
 
       setSuccessMessage(true);
@@ -158,6 +163,7 @@ export default function RegistroCliente() {
             onChange={handleChange}
             error={fieldErrors.nombreCompleto}
             tooltip="Ingresa nombres y apellidos completos"
+            maxLength={100}
           />
 
           <Field
@@ -177,12 +183,12 @@ export default function RegistroCliente() {
             id="rut"
             name="rut"
             type="text"
-            placeholder="12345678K o 12345678-k"
+            placeholder="12345670K"
             value={formData.rut}
             onChange={handleChange}
             error={fieldErrors.rut}
-            tooltip="Acepta dígito K en minúscula o mayúscula"
-            maxLength={10}
+            tooltip="Sin puntos ni guion (ej.: 12345670K). Acepta K en minúscula o mayúscula"
+            maxLength={12}
           />
 
           <Field
@@ -194,8 +200,8 @@ export default function RegistroCliente() {
             value={formData.telefono}
             onChange={handleChange}
             error={fieldErrors.telefono}
-            tooltip="Número con prefijo (ej: +56912345678)"
-            maxLength={13}
+            tooltip="Formato +569XXXXXXXX (ej.: +56912345678)"
+            maxLength={12}
           />
 
           <button

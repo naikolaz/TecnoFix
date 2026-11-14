@@ -5,6 +5,7 @@ namespace TecnoFixBack.DTOs;
 public class RegistroTecnicoDto
 {
     [Required(ErrorMessage = "Debe completar el campo Nombre y apellidos")]
+    [MaxLength(100, ErrorMessage = "El campo Nombre y apellidos no puede superar los 100 caracteres")]
     [RegularExpression(@"^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$", ErrorMessage = "El nombre solo puede contener letras y espacios")]
     public string NombreCompleto { get; set; } = string.Empty;
 
