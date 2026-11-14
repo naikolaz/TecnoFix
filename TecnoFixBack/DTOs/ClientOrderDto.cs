@@ -12,4 +12,5 @@ public class ClientOrderDto
     public DateTime CreatedAt { get; set; }
     public bool CanDecideBudget { get; set; }
     public BudgetDto? Budget { get; set; }
+    public List<OrderLogDto> History { get; set; } = new();
 }

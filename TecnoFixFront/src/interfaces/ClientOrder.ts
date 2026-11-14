@@ -1,3 +1,5 @@
+import type { OrderHistoryEntry } from './OrderHistory'
+
 export interface Budget {
   diagnosis: string
   laborCost: number
@@ -16,4 +18,5 @@ export interface ClientOrder {
   createdAt: string
   canDecideBudget: boolean
   budget: Budget | null
+  history: OrderHistoryEntry[]
 }

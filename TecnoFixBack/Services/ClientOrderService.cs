@@ -61,7 +61,9 @@ public class ClientOrderService : IClientOrderService
         if (!statusChanged)
             throw new BusinessRuleException(BudgetNotAvailableMessage);
 
-        return MapToDto(order);
+        // Re-read so the response includes the new decision log with its responsible user.
+        var updatedOrder = await _orderRepository.GetByIdAsync(order.id) ?? order;
+        return MapToDto(updatedOrder);
     }
 
     private async Task<Order> GetOwnedOrderAsync(int orderId, int clientId)
@@ -87,8 +89,27 @@ public class ClientOrderService : IClientOrderService
             Status = order.status,
             CreatedAt = order.createdAt,
             CanDecideBudget = order.status == OrderStatus.Budgeted,
-            Budget = MapBudget(order)
+            Budget = MapBudget(order),
+            History = MapHistory(order)
         };
+    }
+
+    private static List<OrderLogDto> MapHistory(Order order)
+    {
+        return order.history
+            .OrderBy(l => l.date)
+            .ThenBy(l => l.id)
+            .Select(l => new OrderLogDto
+            {
+                Id = l.id,
+                Action = l.action,
+                Date = l.date,
+                NewStatus = l.newStatus,
+                UserId = l.userId,
+                UserName = l.user?.name,
+                UserRole = l.user?.role?.name
+            })
+            .ToList();
     }
 
     private static BudgetDto? MapBudget(Order order)

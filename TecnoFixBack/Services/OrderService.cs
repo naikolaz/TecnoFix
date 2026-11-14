@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.EntityFrameworkCore;
 using TecnoFixBack.Data;
 using TecnoFixBack.DTOs;
@@ -22,7 +23,7 @@ public class OrderService : IOrderService
         _context = context;
     }
 
-    public async Task<OrderResponseDto> CreateOrderAsync(CreateOrderDto dto)
+    public async Task<OrderResponseDto> CreateOrderAsync(CreateOrderDto dto, int createdByUserId)
     {
         var client = await _context.Users.FindAsync(dto.ClientId);
         
@@ -51,12 +52,16 @@ public class OrderService : IOrderService
         var initialLog = new OrderLog
         {
             action = "Recepción de equipo - Estado: Recibida",
+            newStatus = "Recibida",
+            userId = createdByUserId,
             date = DateTime.UtcNow
         };
 
         var createdOrder = await _orderRepository.CreateOrderAsync(order, initialLog);
 
-        return MapToDto(createdOrder, client);
+        // Re-read so the response includes the initial log with its responsible user.
+        var createdWithHistory = await _orderRepository.GetByIdAsync(createdOrder.id) ?? createdOrder;
+        return MapToDto(createdWithHistory, createdWithHistory.client ?? client);
     }
 
     public async Task<IEnumerable<OrderResponseDto>> GetAllOrdersAsync()
@@ -135,8 +140,27 @@ public class OrderService : IOrderService
             IssueDescription = order.issueDescription,
             Accessories = order.accessories,
             Status = order.status,
-            CreatedAt = order.createdAt
+            CreatedAt = order.createdAt,
+            History = MapHistory(order)
         };
+    }
+
+    private static List<OrderLogDto> MapHistory(Order order)
+    {
+        return order.history
+            .OrderBy(l => l.date)
+            .ThenBy(l => l.id)
+            .Select(l => new OrderLogDto
+            {
+                Id = l.id,
+                Action = l.action,
+                Date = l.date,
+                NewStatus = l.newStatus,
+                UserId = l.userId,
+                UserName = l.user?.name,
+                UserRole = l.user?.role?.name
+            })
+            .ToList();
     }
 
     public async Task<bool> StartDiagnosisAsync(int orderId, int technicianId)
@@ -154,6 +178,8 @@ public class OrderService : IOrderService
         {
             orderId = order.id,
             action = "Inicio de diagnóstico técnico",
+            newStatus = "En diagnóstico",
+            userId = technicianId,
             date = DateTime.UtcNow
         };
 
@@ -183,15 +209,20 @@ public class OrderService : IOrderService
         var log = new OrderLog
         {
             orderId = order.id,
-            action = $"Presupuesto generado. Total: {order.totalCost}",
+            action = $"Presupuesto generado. Total: {order.totalCost.Value.ToString("0.##", CultureInfo.InvariantCulture)}",
+            newStatus = "Presupuestada",
+            userId = technicianId,
             date = DateTime.UtcNow
         };
 
         _context.Loggers.Add(log);
+        order.history.Add(log);
         _context.Orders.Update(order);
         await _context.SaveChangesAsync();
 
-        return MapToDto(order, order.client);
+        // Re-read so the response includes the new log with its responsible user.
+        var updatedOrder = await _orderRepository.GetByIdAsync(order.id) ?? order;
+        return MapToDto(updatedOrder, updatedOrder.client ?? order.client);
     }
 
     

@@ -48,9 +48,12 @@ public class OrderController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
+        if (!TryGetUserId(out int userId))
+            return Unauthorized(new { message = "Token inválido o sin ID de usuario." });
+
         try
         {
-            var result = await _orderService.CreateOrderAsync(dto);
+            var result = await _orderService.CreateOrderAsync(dto, userId);
             return CreatedAtAction(nameof(GetOrderById), new { id = result.Id }, result);
         }
         catch (ArgumentException ex)
@@ -69,8 +72,7 @@ public class OrderController : ControllerBase
     public async Task<IActionResult> StartDiagnosis(int id)
     {
 
-        var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("id")?.Value;
-        if (!int.TryParse(userIdString, out int technicianId))
+        if (!TryGetUserId(out int technicianId))
         {
             return Unauthorized(new { message = "Token inválido o sin ID de usuario." });
         }
@@ -91,8 +93,7 @@ public class OrderController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("id")?.Value;
-        if (!int.TryParse(userIdString, out int technicianId))
+        if (!TryGetUserId(out int technicianId))
         {
             return Unauthorized(new { message = "Token inválido o sin ID de usuario." });
         }
@@ -110,5 +111,11 @@ public class OrderController : ControllerBase
         {
             return StatusCode(500, new { message = "Error interno al guardar el diagnóstico.", detail = ex.Message });
         }
+    }
+
+    private bool TryGetUserId(out int userId)
+    {
+        var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? User.FindFirst("id")?.Value;
+        return int.TryParse(userIdString, out userId);
     }
 }

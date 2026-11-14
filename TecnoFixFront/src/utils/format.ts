@@ -13,3 +13,10 @@ const dateFormatter = new Intl.DateTimeFormat('es-CL', {
 export const formatCurrency = (amount: number): string => currencyFormatter.format(amount)
 
 export const formatDate = (isoDate: string): string => dateFormatter.format(new Date(isoDate))
+
+const dateTimeFormatter = new Intl.DateTimeFormat('es-CL', {
+  dateStyle: 'short',
+  timeStyle: 'short',
+})
+
+export const formatDateTime = (isoDate: string): string => dateTimeFormatter.format(new Date(isoDate))

@@ -1,3 +1,5 @@
+import type { OrderHistoryEntry } from './OrderHistory';
+
 export interface Brand {
   id: number;
   name: string;
@@ -32,4 +34,5 @@ export interface OrderResponseDto {
   accessories?: string;
   status: string;
   createdAt: string;
+  history: OrderHistoryEntry[];
 }

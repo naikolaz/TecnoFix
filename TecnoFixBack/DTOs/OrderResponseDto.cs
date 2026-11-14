@@ -13,4 +13,5 @@ public class OrderResponseDto
     public string? Accessories { get; set; }
     public string Status { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
+    public List<OrderLogDto> History { get; set; } = new();
 }

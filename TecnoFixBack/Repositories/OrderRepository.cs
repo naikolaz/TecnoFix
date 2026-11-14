@@ -35,6 +35,7 @@ public class OrderRepository : IOrderRepository
             await _context.SaveChangesAsync();
 
             initialLog.orderId = order.id;
+            order.history.Add(initialLog);
             await _context.Loggers.AddAsync(initialLog);
             await _context.SaveChangesAsync();
 
@@ -52,6 +53,9 @@ public class OrderRepository : IOrderRepository
     {
         return await _context.Orders
             .Include(o => o.client)
+            .Include(o => o.history)
+                .ThenInclude(l => l.user)
+                    .ThenInclude(u => u!.role)
             .OrderByDescending(o => o.id)
             .ToListAsync();
     }
@@ -60,6 +64,9 @@ public class OrderRepository : IOrderRepository
     {
         return await _context.Orders
             .Include(o => o.client)
+            .Include(o => o.history)
+                .ThenInclude(l => l.user)
+                    .ThenInclude(u => u!.role)
             .Where(o => o.clientId == clientId)
             .OrderByDescending(o => o.id)
             .ToListAsync();
@@ -69,6 +76,9 @@ public class OrderRepository : IOrderRepository
     {
         return await _context.Orders
             .Include(o => o.client)
+            .Include(o => o.history)
+                .ThenInclude(l => l.user)
+                    .ThenInclude(u => u!.role)
             .FirstOrDefaultAsync(o => o.id == id);
     }
 
@@ -88,6 +98,7 @@ public class OrderRepository : IOrderRepository
             return false;
 
         log.orderId = order.id;
+        order.history.Add(log);
         await _context.Loggers.AddAsync(log);
         await _context.SaveChangesAsync();
         await transaction.CommitAsync();
