@@ -9,6 +9,14 @@ namespace TecnoFixBack.Services;
 
 public class OrderService : IOrderService
 {
+    private static readonly HashSet<string> ReservedCatalogValues = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "otra",
+        "otro",
+        "otra marca",
+        "otro modelo"
+    };
+
     private readonly IOrderRepository _orderRepository;
     private readonly IUserRepository _userRepository;
     private readonly TecnoFixContext _context;
@@ -25,6 +33,16 @@ public class OrderService : IOrderService
 
     public async Task<OrderResponseDto> CreateOrderAsync(CreateOrderDto dto, int createdByUserId)
     {
+        if (IsReservedCatalogValue(dto.Brand))
+        {
+            throw new ArgumentException("La marca ingresada no es válida. Seleccione una marca del listado o ingrese un nombre de marca real.");
+        }
+
+        if (IsReservedCatalogValue(dto.Model))
+        {
+            throw new ArgumentException("El modelo ingresado no es válido. Seleccione un modelo del listado o ingrese un nombre de modelo real.");
+        }
+
         var client = await _context.Users.FindAsync(dto.ClientId);
         
         // idRole 2 corresponds to Client
@@ -92,7 +110,7 @@ public class OrderService : IOrderService
 
         // 1. Search or register Brand case-insensitively
         var brand = await _context.Brands
-            .FirstOrDefaultAsync(b => b.Name.ToLower() == cleanBrandName.ToLower());
+            .FirstOrDefaultAsync(b => b.Name.Trim().ToLower() == cleanBrandName.ToLower());
 
         if (brand == null)
         {
@@ -108,7 +126,7 @@ public class OrderService : IOrderService
         if (!string.IsNullOrWhiteSpace(cleanModelName))
         {
             var model = await _context.Models
-                .FirstOrDefaultAsync(m => m.BrandId == brand.Id && m.Name.ToLower() == cleanModelName.ToLower());
+                .FirstOrDefaultAsync(m => m.BrandId == brand.Id && m.Name.Trim().ToLower() == cleanModelName.ToLower());
 
             if (model == null)
             {
@@ -124,6 +142,11 @@ public class OrderService : IOrderService
         return string.IsNullOrWhiteSpace(cleanModelName) 
             ? brand.Name 
             : $"{brand.Name} {cleanModelName}";
+    }
+
+    private static bool IsReservedCatalogValue(string? value)
+    {
+        return !string.IsNullOrWhiteSpace(value) && ReservedCatalogValues.Contains(value.Trim());
     }
 
     private static OrderResponseDto MapToDto(Order order, User? client)
