@@ -6,6 +6,7 @@ using TecnoFixBack.Data;
 using TecnoFixBack.Interfaces;
 using TecnoFixBack.Repositories;
 using TecnoFixBack.Services;
+using TecnoFixBack.Validation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +17,9 @@ if (!string.IsNullOrEmpty(port))
     builder.WebHost.UseUrls($"http://0.0.0.0:{port}");
 }
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+        options.InvalidModelStateResponseFactory = InvalidInputResponseFactory.Create);
 builder.Services.AddDbContext<TecnoFixContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("NeonDB")));
 

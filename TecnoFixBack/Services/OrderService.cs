@@ -225,7 +225,7 @@ public class OrderService : IOrderService
         order.diagnosis = dto.TechnicalDiagnosis;
         order.laborCost = dto.LaborCost;
         order.partsCost = dto.PartsCost;
-        order.totalCost = dto.LaborCost + dto.PartsCost; // Cálculo del total (IVA incluido)
+        order.totalCost = dto.LaborCost!.Value + dto.PartsCost!.Value; // Cálculo del total (IVA incluido)
         order.status = "Presupuestada";
 
         // Registrar en bitácora

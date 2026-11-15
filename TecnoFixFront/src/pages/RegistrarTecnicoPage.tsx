@@ -21,7 +21,7 @@ export const RegistrarTecnicoPage = () => {
     if (!email.trim()) return setErrors(prev => ({ ...prev, general: 'Debe completar el campo Correo Electrónico' }));
     if (!specialty.trim()) return setErrors(prev => ({ ...prev, general: 'Debe completar el campo Especialidad' }));
 
-    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+    const nameRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ ]+$/;
     if (!nameRegex.test(fullName)) {
       setErrors(prev => ({ ...prev, name: 'El nombre solo puede contener letras y espacios' }));
       return;
