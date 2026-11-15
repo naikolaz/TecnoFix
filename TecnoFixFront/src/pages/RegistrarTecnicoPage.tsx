@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { registerTechnician } from '../services/authService';
 import CampoFormulario from '../components/CampoFormulario';
 import MensajeError from '../components/MensajeError';
+import { showConfirmationDialog, showSuccessDialog, showErrorDialog } from '../utils/dialogo';
 
 export const RegistrarTecnicoPage = () => {
   const [fullName, setFullName] = useState('');
@@ -9,12 +10,9 @@ export const RegistrarTecnicoPage = () => {
   const [specialty, setSpecialty] = useState('');
   const [errors, setErrors] = useState({ name: '', general: '' });
   const [isLoading, setIsLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
-  const [showConfirmation, setShowConfirmation] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSuccessMessage('');
     setErrors({ name: '', general: '' });
 
     if (!fullName.trim()) return setErrors(prev => ({ ...prev, general: 'Debe completar el campo Nombre Completo' }));
@@ -26,20 +24,27 @@ export const RegistrarTecnicoPage = () => {
       setErrors(prev => ({ ...prev, name: 'El nombre solo puede contener letras y espacios' }));
       return;
     }
-    setShowConfirmation(true);
-  };
 
-  const executeRegistration = async () => {
-    setShowConfirmation(false);
+    const isConfirmed = await showConfirmationDialog({
+      title: '¿Confirmar registro?',
+      message: '¿Estás seguro de que deseas registrar a este técnico en el sistema?',
+      confirmButtonText: 'Sí, registrar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (!isConfirmed) return;
+
     setIsLoading(true);
     try {
       await registerTechnician({ nombreCompleto: fullName, email, especialidad: specialty });
-      setSuccessMessage('Técnico registrado exitosamente. La contraseña fue enviada a su correo.');
+      showSuccessDialog('¡Técnico Registrado!', 'El técnico ha sido registrado. La contraseña temporal fue enviada a su correo.');
       setFullName('');
       setEmail('');
       setSpecialty('');
     } catch (error: any) {
-      setErrors(prev => ({ ...prev, general: error.message }));
+      const message = error?.message ?? 'No fue posible registrar al técnico.';
+      setErrors(prev => ({ ...prev, general: message }));
+      showErrorDialog('Error al registrar', message);
     } finally {
       setIsLoading(false);
     }
@@ -89,12 +94,6 @@ export const RegistrarTecnicoPage = () => {
 
           <MensajeError mensaje={errors.general} />
 
-          {successMessage && (
-            <div style={{ backgroundColor: '#f0fdf4', color: '#15803d', border: '1px solid #bbf7d0', padding: '12px', borderRadius: '8px', textAlign: 'center', fontSize: '0.9rem' }}>
-              {successMessage}
-            </div>
-          )}
-          
           <button 
             type="submit" 
             disabled={isLoading}
@@ -110,24 +109,6 @@ export const RegistrarTecnicoPage = () => {
           </button>
         </form>
       </div>
-
-      {/* MODAL DE CONFIRMACIÓN */}
-      {showConfirmation && (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
-          <div style={{ background: 'white', padding: '32px', borderRadius: '12px', width: '90%', maxWidth: '360px', textAlign: 'center', boxShadow: '0 10px 25px rgba(0,0,0,0.2)' }}>
-            <h3 style={{ color: 'var(--color-primario, #064789)', margin: '0 0 10px 0' }}>¿Confirmar registro?</h3>
-            <p style={{ color: '#555', marginBottom: '24px' }}>¿Estás seguro de que deseas registrar a este técnico en el sistema?</p>
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-              <button type="button" onClick={() => setShowConfirmation(false)} style={{ padding: '10px 20px', border: '1px solid #ccc', borderRadius: '8px', background: 'white', cursor: 'pointer', fontWeight: 'bold' }}>
-                Cancelar
-              </button>
-              <button type="button" onClick={executeRegistration} className="boton boton--primario">
-                Aceptar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
