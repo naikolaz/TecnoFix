@@ -1,5 +1,6 @@
 import api from '../config/api'
 import type { LoginRequest, LoginResponse } from '../interfaces/auth'
+import { getErrorMessage } from '../utils/errores'
 
 export interface ClientOption {
   id: number
@@ -28,14 +29,8 @@ export const registerTechnician = async (technicianData: {
   try {
     const { data } = await api.post('/auth/registrar-tecnico', technicianData);
     return data;
-  } catch (error: any) {
-    if (error.response?.data?.error) {
-      throw new Error(error.response.data.error);
-    }
-    if (error.response?.data?.message) {
-      throw new Error(error.response.data.message);
-    }
-    throw new Error('Ocurrió un error inesperado al comunicarse con el servidor.');
+  } catch (error) {
+    throw new Error(getErrorMessage(error));
   }
 };
 
