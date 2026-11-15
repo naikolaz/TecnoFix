@@ -27,6 +27,12 @@ function App() {
       <Route element={<RutaProtegida rolesPermitidos={['Administrador', 'Técnico']} />}>
         <Route element={<Layout />}>
           <Route path="/ordenes/nueva" element={<RegistrarOrdenPage />} />
+        </Route>
+      </Route>
+
+      {/* Diagnóstico y presupuesto: exclusivo de Técnico */}
+      <Route element={<RutaProtegida rolesPermitidos={['Técnico']} />}>
+        <Route element={<Layout />}>
           <Route path="/ordenes/diagnostico" element={<DiagnosticoOrderPage />} />
         </Route>
       </Route>
