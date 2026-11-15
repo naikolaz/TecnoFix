@@ -174,7 +174,7 @@ export default function RegistroOrdenForm() {
     if (!validateForm()) return;
 
     const isConfirmed = await showConfirmationDialog({
-      title: 'Confirmación de Orden (ORD-001)',
+      title: 'Confirmación de Orden',
       message: '¿Está seguro de registrar esta nueva orden de reparación en el sistema TecnoFix?',
       confirmButtonText: 'Sí, registrar orden',
       cancelButtonText: 'Cancelar'

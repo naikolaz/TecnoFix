@@ -72,7 +72,7 @@ export default function RegistroCliente() {
     if (!validateForm()) return;
 
     const isConfirmed = await showConfirmationDialog({
-      title: 'Confirmación de Registro (NF01)',
+      title: 'Confirmación de Registro',
       message: '¿Está seguro de registrar este nuevo cliente en el sistema TecnoFix?',
       confirmButtonText: 'Sí, registrar',
       cancelButtonText: 'Cancelar'
