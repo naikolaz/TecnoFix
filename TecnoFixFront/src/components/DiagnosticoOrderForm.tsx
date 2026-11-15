@@ -6,6 +6,7 @@ import { getOrdersForDiagnosis, startDiagnosis, saveDiagnosisAndBudget } from '.
 import type { CostPayload } from '../services/orderService';
 import { showConfirmationDialog, showSuccessDialog, showErrorDialog } from '../utils/dialogo';
 import { getErrorMessage } from '../utils/errores';
+import { formatCurrency } from '../utils/format';
 
 interface OptionType {
   value: number;
@@ -118,7 +119,7 @@ export default function DiagnosticoOrderForm() {
 
     const isConfirmed = await showConfirmationDialog({
       title: 'Confirmar Presupuesto',
-      message: `El costo total calculado (IVA incluido) es $${totalCost}. ¿Desea registrar este presupuesto y cambiar el estado a «Presupuestada»?`,
+      message: `El costo total calculado (mano de obra + repuestos) es ${formatCurrency(totalCost)}. ¿Desea registrar este presupuesto y cambiar el estado a «Presupuestada»?`,
       confirmButtonText: 'Sí, registrar',
       cancelButtonText: 'Cancelar'
     });
@@ -244,12 +245,12 @@ export default function DiagnosticoOrderForm() {
 
               <div className="campo" style={{ flex: '1 1 200px' }}>
                 <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px', color: '#0056b3' }}>
-                  Costo Total (Valores finales)
+                  Costo total ($)
                 </label>
                 <input
                   type="text"
                   readOnly
-                  value={`$ ${currentTotal.toLocaleString('es-CL')}`}
+                  value={formatCurrency(currentTotal)}
                   style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #0056b3', backgroundColor: '#e9f2fb', fontWeight: 'bold' }}
                 />
               </div>
