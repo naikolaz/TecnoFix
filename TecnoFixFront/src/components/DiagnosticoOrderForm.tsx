@@ -3,6 +3,7 @@ import Select from 'react-select';
 import { useAuth } from '../context/useAuth';
 import OrderHistory from './OrderHistory';
 import { getOrdersForDiagnosis, startDiagnosis, saveDiagnosisAndBudget } from '../services/orderService';
+import type { CostPayload } from '../services/orderService';
 import { showConfirmationDialog, showSuccessDialog, showErrorDialog } from '../utils/dialogo';
 import { getErrorMessage } from '../utils/errores';
 
@@ -17,6 +18,19 @@ interface DiagnosisFormState {
   laborCost: string;
   partsCost: string;
 }
+
+const isValidCost = (value: string): boolean => {
+  const cost = Number(value.trim());
+  return value.trim() !== '' && Number.isFinite(cost) && cost >= 0;
+};
+
+// Un valor que no es número se envía tal cual para que el backend responda «El costo ingresado no es válido»
+const toCostPayload = (value: string): CostPayload => {
+  const trimmed = value.trim();
+  if (trimmed === '') return null;
+  const cost = Number(trimmed);
+  return Number.isFinite(cost) ? cost : trimmed;
+};
 
 export default function DiagnosticoOrderForm() {
   const { isAuthenticated } = useAuth();
@@ -77,16 +91,18 @@ export default function DiagnosticoOrderForm() {
       return false;
     }
     
-    const labor = parseFloat(formData.laborCost);
-    const parts = parseFloat(formData.partsCost);
-
-    if (formData.laborCost.trim() === '' || isNaN(labor) || labor < 0) {
-      showErrorDialog('Validación requerida', 'El costo ingresado no es válido (Mano de obra)');
+    if (formData.laborCost.trim() === '') {
+      showErrorDialog('Validación requerida', 'Debe completar el campo Costo de mano de obra');
       return false;
     }
 
-    if (formData.partsCost.trim() === '' || isNaN(parts) || parts < 0) {
-      showErrorDialog('Validación requerida', 'El costo ingresado no es válido (Repuestos)');
+    if (formData.partsCost.trim() === '') {
+      showErrorDialog('Validación requerida', 'Debe completar el campo Costo de repuestos');
+      return false;
+    }
+
+    if (!isValidCost(formData.laborCost) || !isValidCost(formData.partsCost)) {
+      showErrorDialog('Validación requerida', 'El costo ingresado no es válido');
       return false;
     }
 
@@ -114,8 +130,8 @@ export default function DiagnosticoOrderForm() {
     try {
       const payload = {
         technicalDiagnosis: formData.technicalDiagnosis.trim(),
-        laborCost: parseFloat(formData.laborCost),
-        partsCost: parseFloat(formData.partsCost)
+        laborCost: toCostPayload(formData.laborCost),
+        partsCost: toCostPayload(formData.partsCost)
       };
 
       await saveDiagnosisAndBudget(selectedOrder.value, payload);
@@ -202,7 +218,7 @@ export default function DiagnosticoOrderForm() {
             <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
               <div className="campo" style={{ flex: '1 1 200px' }}>
                 <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>
-                  Costo mano de obra ($) *
+                  Costo de mano de obra ($) *
                 </label>
                 <input
                   type="number"
@@ -215,7 +231,7 @@ export default function DiagnosticoOrderForm() {
 
               <div className="campo" style={{ flex: '1 1 200px' }}>
                 <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>
-                  Costo repuestos ($) *
+                  Costo de repuestos ($) *
                 </label>
                 <input
                   type="number"

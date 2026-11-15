@@ -27,10 +27,12 @@ export const obtenerOrdenes = getAllOrders;
 export const obtenerOrdenPorId = getOrderById;
 export const obtenerOrdenesPorCliente = getOrdersByClientId;
 
+export type CostPayload = number | string | null;
+
 export interface UpdateDiagnosisDto {
   technicalDiagnosis: string;
-  laborCost: number;
-  partsCost: number;
+  laborCost: CostPayload;
+  partsCost: CostPayload;
 }
 
 export const getOrdersForDiagnosis = async () => {
