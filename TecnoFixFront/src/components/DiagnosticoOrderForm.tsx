@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import Select from 'react-select';
 import { useAuth } from '../context/useAuth';
-import OrderHistory from './OrderHistory';
 import { getOrdersForDiagnosis, startDiagnosis, saveDiagnosisAndBudget } from '../services/orderService';
 import type { CostPayload } from '../services/orderService';
 import { showConfirmationDialog, showSuccessDialog, showErrorDialog } from '../utils/dialogo';
@@ -196,12 +195,6 @@ export default function DiagnosticoOrderForm() {
             <div style={{ padding: '15px', backgroundColor: '#f8f9fa', borderRadius: '8px', border: '1px solid #dee2e6' }}>
               <strong>Orden seleccionada:</strong> {selectedOrder?.label} <br/>
               <strong>Falla reportada:</strong> {selectedOrder?.order.issueDescription}
-              <div style={{ marginTop: '14px' }}>
-                <strong>Bitácora:</strong>
-                <div style={{ marginTop: '8px' }}>
-                  <OrderHistory entries={selectedOrder?.order.history ?? []} />
-                </div>
-              </div>
             </div>
 
             <div className="campo">
