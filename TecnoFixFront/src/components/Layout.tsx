@@ -26,7 +26,7 @@ export default function Layout() {
     <div className="layout">
       <header className="barra">
         <Link to="/inicio" className="barra__marca">
-          <Logo />
+          <Logo claro />
         </Link>
 
         <nav className="barra__menu">
