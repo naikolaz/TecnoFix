@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from 'react';
+﻿import { useState, useEffect, useRef } from 'react';
 import Select from 'react-select';
 import { useAuth } from '../context/useAuth';
 import { getClients } from '../services/authService';
@@ -35,6 +35,7 @@ export default function RegistroOrdenForm() {
   const [clientsOptions, setClientsOptions] = useState<OptionType[]>([]);
   const [brandsOptions, setBrandsOptions] = useState<OptionType[]>([]);
   const [modelsOptions, setModelsOptions] = useState<OptionType[]>([]);
+  const [isLoadingModels, setIsLoadingModels] = useState(false);
 
   // Selected values
   const [selectedClient, setSelectedClient] = useState<OptionType | null>(null);
@@ -53,6 +54,7 @@ export default function RegistroOrdenForm() {
 
   const [fieldErrors, setFieldErrors] = useState<OrderFormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
+  const modelsRequestRef = useRef(0);
 
   // 1. Load clients
   useEffect(() => {
@@ -100,30 +102,39 @@ export default function RegistroOrdenForm() {
     if (isAuthenticated) loadBrands();
   }, [isAuthenticated]);
 
-  // 3. Load models when brand changes
-  useEffect(() => {
-    const loadModels = async () => {
-      if (!selectedBrand || selectedBrand.value === 'otra') {
-        setModelsOptions([]);
-        setSelectedModel(null);
-        return;
-      }
+  // 3. Load models directly when the brand changes
+  const loadModelsForBrand = async (brand: OptionType | null) => {
+    const requestId = ++modelsRequestRef.current;
 
-      try {
-        const models = await getModelsByBrand(selectedBrand.value);
-        const options: OptionType[] = models.map((m) => ({
-          value: m.id,
-          label: m.name
-        }));
-        options.push({ value: 'otro', label: '-- Otro modelo (Ingresar manualmente) --' });
-        setModelsOptions(options);
-      } catch (error) {
-        console.error('Error al cargar modelos:', error);
-      }
-    };
+    if (!brand || brand.value === 'otra') {
+      setModelsOptions([]);
+      setSelectedModel(null);
+      setIsLoadingModels(false);
+      return;
+    }
 
-    loadModels();
-  }, [selectedBrand]);
+    setIsLoadingModels(true);
+    try {
+      const models = await getModelsByBrand(brand.value);
+      if (requestId !== modelsRequestRef.current) return;
+
+      const options: OptionType[] = models.map((m) => ({
+        value: m.id,
+        label: m.name
+      }));
+      options.push({ value: 'otro', label: '-- Otro modelo (Ingresar manualmente) --' });
+      setModelsOptions(options);
+    } catch (error) {
+      if (requestId !== modelsRequestRef.current) return;
+      console.error('Error al cargar modelos:', error);
+      // Si falla el catálogo, permitir igualmente escribir un modelo manual.
+      setModelsOptions([{ value: 'otro', label: '-- Otro modelo (Ingresar manualmente) --' }]);
+    } finally {
+      if (requestId === modelsRequestRef.current) {
+        setIsLoadingModels(false);
+      }
+    }
+  };
 
   // Check if manually entered brand already exists
   const matchingExistingBrand = String(selectedBrand?.value) === 'otra' && formData.customBrand.trim() !== ''
@@ -332,6 +343,7 @@ export default function RegistroOrdenForm() {
                   setSelectedModel(null);
                   setModelsOptions([]);
                   setFieldErrors(prev => ({ ...prev, brandAndModel: undefined }));
+                  void loadModelsForBrand(option);
                 }}
                 placeholder="Buscar marca (ej: Samsung, Asus)..."
                 isClearable
@@ -393,8 +405,16 @@ export default function RegistroOrdenForm() {
                       setSelectedModel(option);
                       setFieldErrors(prev => ({ ...prev, brandAndModel: undefined }));
                     }}
-                    placeholder={selectedBrand ? "Buscar modelo..." : "Primero elija una marca"}
-                    isDisabled={!selectedBrand}
+                    placeholder={
+                      !selectedBrand
+                        ? "Primero elija una marca"
+                        : isLoadingModels
+                          ? "Cargando modelos..."
+                          : "Buscar modelo..."
+                    }
+                    isDisabled={!selectedBrand || isLoadingModels}
+                    isLoading={isLoadingModels}
+                    loadingMessage={() => "Cargando modelos..."}
                     isClearable
                     isSearchable
                     styles={customSelectStyles}
