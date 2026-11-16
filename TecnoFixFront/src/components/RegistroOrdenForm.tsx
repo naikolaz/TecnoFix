@@ -145,7 +145,16 @@ export default function RegistroOrdenForm() {
       errors.deviceType = 'Debe completar el campo Tipo de equipo';
     }
 
-    if (!selectedBrand || (selectedBrand.value === 'otra' && !formData.customBrand.trim())) {
+    const hasBrand =
+      selectedBrand !== null &&
+      (selectedBrand.value !== 'otra' || formData.customBrand.trim() !== '');
+
+    const hasModel = selectedBrand?.value === 'otra'
+      ? formData.customModel.trim() !== ''
+      : selectedModel !== null &&
+        (selectedModel.value !== 'otro' || formData.customModel.trim() !== '');
+
+    if (!hasBrand || !hasModel) {
       errors.brandAndModel = 'Debe completar el campo Marca y modelo';
     }
 
@@ -193,7 +202,7 @@ export default function RegistroOrdenForm() {
       clientId: Number(selectedClient?.value),
       deviceType: formData.deviceType.trim(),
       brand: brandName,
-      model: modelName || undefined,
+      model: modelName,
       serialNumber: formData.serialNumber.trim() || undefined,
       issueDescription: formData.issueDescription.trim(),
       accessories: formData.accessories.trim() || undefined
@@ -313,13 +322,15 @@ export default function RegistroOrdenForm() {
             {/* Marca */}
             <div className="campo" style={{ flex: '1 1 300px' }}>
               <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>
-                Marca y modelo (Marca) *
+                Marca *
               </label>
               <Select
                 options={brandsOptions}
                 value={selectedBrand}
                 onChange={(option) => {
                   setSelectedBrand(option);
+                  setSelectedModel(null);
+                  setModelsOptions([]);
                   setFieldErrors(prev => ({ ...prev, brandAndModel: undefined }));
                 }}
                 placeholder="Buscar marca (ej: Samsung, Asus)..."
@@ -358,7 +369,7 @@ export default function RegistroOrdenForm() {
             {/* Modelo */}
             <div className="campo" style={{ flex: '1 1 300px' }}>
               <label style={{ display: 'block', fontWeight: 600, marginBottom: '8px' }}>
-                Modelo
+                Modelo *
               </label>
               
               {selectedBrand?.value === 'otra' ? (
@@ -366,7 +377,11 @@ export default function RegistroOrdenForm() {
                   type="text"
                   placeholder="Especifique el modelo para esta nueva marca..."
                   value={formData.customModel}
-                  onChange={(e) => setFormData(prev => ({ ...prev, customModel: e.target.value }))}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setFormData(prev => ({ ...prev, customModel: val }));
+                    setFieldErrors(prev => ({ ...prev, brandAndModel: undefined }));
+                  }}
                   style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid #ccc' }}
                 />
               ) : (
@@ -374,7 +389,10 @@ export default function RegistroOrdenForm() {
                   <Select
                     options={modelsOptions}
                     value={selectedModel}
-                    onChange={(option) => setSelectedModel(option)}
+                    onChange={(option) => {
+                      setSelectedModel(option);
+                      setFieldErrors(prev => ({ ...prev, brandAndModel: undefined }));
+                    }}
                     placeholder={selectedBrand ? "Buscar modelo..." : "Primero elija una marca"}
                     isDisabled={!selectedBrand}
                     isClearable
@@ -387,7 +405,11 @@ export default function RegistroOrdenForm() {
                       type="text"
                       placeholder="Especifique el modelo..."
                       value={formData.customModel}
-                      onChange={(e) => setFormData(prev => ({ ...prev, customModel: e.target.value }))}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setFormData(prev => ({ ...prev, customModel: val }));
+                        setFieldErrors(prev => ({ ...prev, brandAndModel: undefined }));
+                      }}
                       style={{ marginTop: '10px', width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #ccc' }}
                     />
                   )}

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../config/api';
 import { getErrorMessage } from '../utils/errores';
+import { isValidRut, isValidRutFormat, RUT_FORMAT_MESSAGE, RUT_INVALID_MESSAGE } from '../utils/validaciones';
 import { showConfirmationDialog, showSuccessDialog, showErrorDialog } from '../utils/dialogo';
 
 interface ClientRegistrationForm {
@@ -47,10 +48,10 @@ export default function RegistroCliente() {
 
     if (!rut) {
       errors.rut = 'Debe completar el campo RUT';
-    } else if (/[.-]/.test(rut)) {
-      errors.rut = 'El RUT debe ingresarse sin puntos ni guion (ej.: 12345670K)';
-    } else if (!/^[0-9]{7,8}[0-9Kk]$/.test(rut)) {
-      errors.rut = 'El RUT ingresado no es válido (ej.: 12345670K)';
+    } else if (!isValidRutFormat(rut)) {
+      errors.rut = RUT_FORMAT_MESSAGE;
+    } else if (!isValidRut(rut)) {
+      errors.rut = RUT_INVALID_MESSAGE;
     }
 
     const telefono = formData.telefono.trim();

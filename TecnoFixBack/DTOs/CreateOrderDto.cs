@@ -16,11 +16,12 @@ public class CreateOrderDto
     [JsonPropertyName("deviceType")]
     public string DeviceType { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Debe completar el campo Marca")]
+    [Required(ErrorMessage = "Debe completar el campo Marca y modelo")]
     [MaxLength(100, ErrorMessage = "El campo Marca no puede superar los 100 caracteres")]
     [JsonPropertyName("brand")]
     public string Brand { get; set; } = string.Empty;
 
+    [Required(ErrorMessage = "Debe completar el campo Marca y modelo")]
     [MaxLength(100, ErrorMessage = "El campo Modelo no puede superar los 100 caracteres")]
     [JsonPropertyName("model")]
     public string? Model { get; set; }

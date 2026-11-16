@@ -217,9 +217,10 @@ public class AuthService : IAuthService
 
         try
         {
-            string cleanRut = rut.Replace(".", "").Replace("-", "").Trim().ToUpper();
+            // El ERS exige el RUT sin puntos ni guion: no se limpian caracteres.
+            string cleanRut = rut.Trim().ToUpper();
 
-            if (cleanRut.Length < 2) 
+            if (!Regex.IsMatch(cleanRut, @"^[0-9]{7,8}[0-9Kk]$"))
                 return false;
 
             string body = cleanRut[..^1];
