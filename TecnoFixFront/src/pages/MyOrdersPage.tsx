@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import Tooltip from '../components/Tooltip'
-import OrderHistory from '../components/OrderHistory'
 import { BUDGET_MESSAGES } from '../config/constantes'
 import type { ClientOrder } from '../interfaces/ClientOrder'
 import { approveBudget, getMyOrders, rejectBudget } from '../services/clientOrderService'
@@ -228,11 +227,6 @@ function MyOrdersPage() {
                   </dl>
                 </div>
               )}
-
-              <div className="order-detail__history">
-                <h3>Historial de la orden</h3>
-                <OrderHistory entries={selectedOrder.history} />
-              </div>
 
               {selectedOrder.canDecideBudget && (
                 <>

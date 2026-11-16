@@ -152,19 +152,6 @@
   padding-top: 18px;
 }
 
-.order-detail__history {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  border-top: 1px solid var(--color-borde);
-  padding-top: 18px;
-}
-
-.order-detail__history h3 {
-  margin: 0;
-  color: var(--color-primario);
-}
-
 .budget {
   display: flex;
   flex-direction: column;
